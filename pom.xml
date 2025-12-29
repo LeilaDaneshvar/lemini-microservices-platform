@@ -27,7 +27,7 @@
     </properties>
 
     <modules>
-
+        <module>lemini-config-server</module>
     </modules>
 
     <dependencyManagement>
