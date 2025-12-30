@@ -28,6 +28,7 @@
 
     <modules>
         <module>lemini-config-server</module>
+        <module>lemini-discovery-service</module>
     </modules>
 
     <dependencyManagement>
