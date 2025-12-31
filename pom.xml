@@ -30,6 +30,7 @@
         <module>lemini-config-server</module>
         <module>lemini-discovery-service</module>
         <module>lemini-gateway</module>
+        <module>lemini-user-service</module>
     </modules>
 
     <dependencyManagement>
