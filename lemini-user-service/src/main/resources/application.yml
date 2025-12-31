@@ -12,3 +12,16 @@ eureka:
             fetch-registry: true
     instance:
         instance_id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+management:
+    tracing:
+        sampling:
+            probability: 1.0
+    endpoints:
+        web:
+            exposure:
+                include: "*"  # Expose everything
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

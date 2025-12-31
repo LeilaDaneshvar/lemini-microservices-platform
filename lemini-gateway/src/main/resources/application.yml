@@ -7,7 +7,7 @@ spring:
     cloud:
         gateway:
             discovery:
-            locator:
+              locator:
                 enabled: true
                 lower-case-service-id: true
 
@@ -18,3 +18,15 @@ eureka:
         register-with-eureka: true
         fetch-registry: true
         
+management:
+    tracing:
+        sampling:
+            probability: 1.0
+    endpoints:
+        web:
+            exposure:
+                include: "*"  # Expose everything
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
