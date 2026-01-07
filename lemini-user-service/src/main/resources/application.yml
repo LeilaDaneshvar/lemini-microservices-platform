@@ -4,6 +4,9 @@ spring:
     application:
         name: lemini-user-service
 
+# ===============================
+# eureka configuration
+# ===============================
 eureka:
     client:
         service-url:
@@ -12,7 +15,10 @@ eureka:
             fetch-registry: true
     instance:
         instance_id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-
+        
+# ===============================
+# anagement config
+# ===============================
 management:
     tracing:
         sampling:
@@ -22,6 +28,16 @@ management:
             exposure:
                 include: "*"  # Expose everything
 
+# ===============================
+# logging config
+# ===============================
 logging:
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+# ===============================
+# Application Specific Properties
+# ===============================
+app:
+    security:
+        tokenSecret: VerificationTokenSecretKeyGen98758y4563!@#$$%^^&*()_+|}{":?><,./;'[]\-=`~
