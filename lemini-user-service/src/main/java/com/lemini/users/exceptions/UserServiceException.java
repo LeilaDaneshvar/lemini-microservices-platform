@@ -1,5 +1,7 @@
 package com.lemini.users.exceptions;
 
+import java.util.List;
+
 import lombok.Getter;
 
 @Getter
@@ -8,7 +10,8 @@ public class UserServiceException extends RuntimeException {
 
     public enum UserErrorType {
         USER_NOT_FOUND("{user.err.not_found}"),
-        EMAIL_ALREADY_EXISTS("{user.err.email_exists}"),;
+        EMAIL_ALREADY_EXISTS("{user.err.email_exists}"),
+        VALIDATION_ERROR("{user.err.validation}");
 
         private final String defaultMessage;
 
@@ -26,6 +29,7 @@ public class UserServiceException extends RuntimeException {
     }
 
     private final UserErrorType errorType;
+
 
     public UserServiceException(UserErrorType errorType) {
         super(errorType.getMessage());

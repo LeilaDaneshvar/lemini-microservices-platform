@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 
 import com.lemini.users.exceptions.UserServiceException;
 import com.lemini.users.io.entity.UserEntity;
-import com.lemini.users.io.mapper.UserMapper;
+import com.lemini.users.io.mapper.UserEntityMapper;
 import com.lemini.users.io.repository.UserRepository;
 import com.lemini.users.service.UserService;
 import com.lemini.users.shared.Utils;
@@ -19,7 +19,7 @@ import com.lemini.users.shared.dto.UserDto;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
+    private final UserEntityMapper userMapper;
     private final Utils utils;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     
@@ -31,6 +31,7 @@ public class UserServiceImpl implements UserService {
         if(userRepository.findByEmail(user.email()).isPresent()) {
             throw new UserServiceException(UserServiceException.UserErrorType.EMAIL_ALREADY_EXISTS);
         }
+        
         // 2. Map Record -> Entity
         UserEntity userEntity = userMapper.userDtoToUserEntity(user);
 
