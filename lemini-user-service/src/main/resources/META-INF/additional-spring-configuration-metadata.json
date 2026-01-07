@@ -1,0 +1,5 @@
+{"properties": [{
+    "name": "app.security.token-secret",
+    "type": "java.lang.String",
+    "description": "The private secret key used to sign and verify JWT authentication tokens. Must be a strong, random string (min 64 chars recommended) and kept confidential."
+}]}
