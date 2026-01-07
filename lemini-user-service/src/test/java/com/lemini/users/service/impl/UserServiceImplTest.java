@@ -25,7 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.lemini.users.exceptions.UserServiceException;
 import com.lemini.users.io.entity.AddressEntity;
 import com.lemini.users.io.entity.UserEntity;
-import com.lemini.users.io.mapper.UserMapper;
+import com.lemini.users.io.mapper.UserEntityMapper;
 import com.lemini.users.io.repository.UserRepository;
 import com.lemini.users.shared.dto.AddressDto;
 import com.lemini.users.shared.dto.UserDto;
@@ -41,8 +41,8 @@ public class UserServiceImplTest {
     UserServiceImpl userService;
 
     @Mock
-    UserMapper userMapper;
-
+    UserEntityMapper userMapper;
+    
     @Mock
     Utils utils;
 
@@ -83,7 +83,7 @@ public class UserServiceImplTest {
         userEntity.setAddresses(List.of(addressEntity));
     }
 
-    @Test
+   @Test
     void testCreateUser_HappyPath() {
         // Given
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty()); // No duplicate
@@ -107,6 +107,7 @@ public class UserServiceImplTest {
         verify(bCryptPasswordEncoder, times(1)).encode("password123");
 
     }
+
 
     @Test
     void testCreateUser_DuplicateEmail() {

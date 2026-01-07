@@ -15,7 +15,7 @@
     <description>User Management Service</description>
 
     <properties>
-        <lombok.version>1.18.26</lombok.version>
+        <lombok.version>1.18.30</lombok.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
     </properties>
 
