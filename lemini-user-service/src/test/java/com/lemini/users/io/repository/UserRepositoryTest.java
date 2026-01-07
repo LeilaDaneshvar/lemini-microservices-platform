@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.lemini.users.io.entity.AddressEntity;
 import com.lemini.users.io.entity.UserEntity;
@@ -47,15 +48,16 @@ public class UserRepositoryTest {
     @Test
     void testFindByEmail() {
         String email = "user1@example.com";
-        UserEntity foundUser = userRepository.findByEmail(email);
-        assertNotNull(foundUser);
+        Optional<UserEntity> foundUserOptional = userRepository.findByEmail(email);
+        assertTrue(foundUserOptional.isPresent());
+        UserEntity foundUser = foundUserOptional.get();
         assertEquals(email, foundUser.getEmail());
     }
 
     @Test
     void testFindByEmail_NotFound() {
         String email = "nonexistent@example.com";
-        UserEntity foundUser = userRepository.findByEmail(email);
-        assertNull(foundUser);
+        Optional<UserEntity> foundUserOptional = userRepository.findByEmail(email);
+        assertTrue(foundUserOptional.isEmpty());
     }
 }
