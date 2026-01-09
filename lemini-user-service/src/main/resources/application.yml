@@ -17,7 +17,7 @@ eureka:
         instance_id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
         
 # ===============================
-# anagement config
+# management config
 # ===============================
 management:
     tracing:
