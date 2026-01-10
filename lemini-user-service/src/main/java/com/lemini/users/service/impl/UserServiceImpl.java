@@ -1,6 +1,5 @@
 package com.lemini.users.service.impl;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +12,7 @@ import com.lemini.users.io.repository.UserRepository;
 import com.lemini.users.service.UserService;
 import com.lemini.users.shared.Utils;
 import com.lemini.users.shared.dto.UserDto;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Service
 @AllArgsConstructor
