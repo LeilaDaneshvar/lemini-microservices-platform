@@ -4,8 +4,8 @@ import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import com.lemini.users.validation.ValidEmail;
 import java.util.List;
 
 public record UserRequestModel(
@@ -19,7 +19,7 @@ public record UserRequestModel(
     String lastName,
 
     @NotNull(message = "{validation.email.notNull}")
-    @Email(message = "{validation.email.format}")
+    @ValidEmail(message = "{validation.email.format}")
     @Size(max = 120, message = "{validation.email.size}")
     String email,
 
