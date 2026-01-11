@@ -1,6 +1,5 @@
 package com.lemini.users.exceptions;
 
-import java.util.List;
 
 import lombok.Getter;
 
