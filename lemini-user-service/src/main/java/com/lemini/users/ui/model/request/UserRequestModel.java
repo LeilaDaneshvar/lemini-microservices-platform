@@ -4,17 +4,18 @@ import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import com.lemini.users.validation.ValidEmail;
 import java.util.List;
 
 public record UserRequestModel(
 
-    @NotNull(message = "{validation.firstName.notNull}")
+    @NotBlank(message = "{validation.firstName.notNull}")
     @Size(min = 2, max = 50, message = "{validation.firstName.size}")
     String firstName,
 
-    @NotNull(message = "{validation.lastName.notNull}")
+    @NotBlank(message = "{validation.lastName.notNull}")
     @Size(min = 2, max = 50, message = "{validation.lastName.size}")
     String lastName,
 
