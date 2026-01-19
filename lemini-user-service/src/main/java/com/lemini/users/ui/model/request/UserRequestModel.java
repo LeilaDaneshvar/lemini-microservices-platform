@@ -2,11 +2,12 @@ package com.lemini.users.ui.model.request;
 
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import com.lemini.users.validation.ValidEmail;
+import com.lemini.users.validation.ValidPassword;
+
 import java.util.List;
 
 public record UserRequestModel(
@@ -26,10 +27,7 @@ public record UserRequestModel(
 
     @NotNull(message = "{validation.password.notNull}")
     @Size(min = 8, max = 20, message = "{validation.password.size}")
-    @Pattern(
-        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-        message = "{validation.password.complexity}"
-    )
+    @ValidPassword(message = "{validation.password.format}")
     String password,
 
     @Valid
