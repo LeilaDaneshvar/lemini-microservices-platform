@@ -12,6 +12,11 @@ import com.lemini.users.io.repository.UserRepository;
 import com.lemini.users.service.UserService;
 import com.lemini.users.shared.Utils;
 import com.lemini.users.shared.dto.UserDto;
+
+import java.util.Collections;
+
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Service
@@ -53,6 +58,25 @@ public class UserServiceImpl implements UserService {
         UserEntity storedUser = userRepository.save(userEntity);
         
         return userMapper.userEntityToUserDto(storedUser);
+    }
+
+    //This method is called by Spring Security for authentication
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UserServiceException {
+        //1. Find user by email and throw exception if not found
+        UserEntity userEntity = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
+            
+        //2. Return UserDetails object
+        return new User(
+            userEntity.getEmail(),
+            userEntity.getEncryptedPassword(),
+            userEntity.getEmailVerificationStatus(),
+            true,
+            true,
+            true,
+            Collections.emptyList()
+        );
     }
 
 }
