@@ -2,19 +2,56 @@ package com.lemini.users.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+
+import com.lemini.users.service.UserService;
 
 import lombok.AllArgsConstructor;
 
 @Configuration
+@EnableWebSecurity
 @AllArgsConstructor
 public class WebSecurityConfig {
 
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @Bean
-    BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        
+        authenticationManagerBuilder.userDetailsService(userService)
+               .passwordEncoder(passwordEncoder.bCryptPasswordEncoder());
+        
+        return authenticationManagerBuilder.build();
     }
+
+@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    
+    CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager(http));
+    customAuthenticationFilter.setFilterProcessesUrl(SecurityConstants.SIGN_IN_URL);
+    
+    http
+            .csrf(csrf -> csrf.disable()) // stateless JWT
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.POST, "/users").permitAll() // Allow Registration
+                .anyRequest().authenticated()
+            )
+            .authenticationManager(authenticationManager(http)) // Inject the manager
+            .addFilter(customAuthenticationFilter) // Add login filter to the chain
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Force JWT mode
+                
+    return http.build();
+}
+    
 
 
 }
