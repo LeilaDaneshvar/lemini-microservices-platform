@@ -2,6 +2,8 @@ package com.lemini.users.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.MessageSource;
+import jakarta.validation.Validator;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -21,6 +23,8 @@ public class WebSecurityConfig {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final Validator validator;
+    private final MessageSource messageSource;
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
@@ -32,25 +36,29 @@ public class WebSecurityConfig {
         return authenticationManagerBuilder.build();
     }
 
-@Bean
-SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    
-    CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager(http));
-    customAuthenticationFilter.setFilterProcessesUrl(SecurityConstants.SIGN_IN_URL);
-    
-    http
-            .csrf(csrf -> csrf.disable()) // stateless JWT
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST, "/users").permitAll() // Allow Registration
-                .anyRequest().authenticated()
-            )
-            .authenticationManager(authenticationManager(http)) // Inject the manager
-            .addFilter(customAuthenticationFilter) // Add login filter to the chain
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Force JWT mode
-                
-    return http.build();
-}
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        
+        AuthenticationManager authManager = authenticationManager(http);
+
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authManager, validator, messageSource);
+
+        customAuthenticationFilter.setFilterProcessesUrl(SecurityConstants.SIGN_IN_URL);
+
+        http
+                .csrf(csrf -> csrf.disable()) // stateless JWT
+                .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(HttpMethod.POST, "/users").permitAll() // Allow Registration
+                    .anyRequest().authenticated()
+                )
+                .authenticationManager(authManager) // Inject the manager
+                .addFilter(customAuthenticationFilter) // Add login filter to the chain
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    ); // Force JWT mode
+                    
+        return http.build();
+    }
     
 
 

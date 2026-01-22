@@ -21,7 +21,7 @@
 
     <dependencies>
         <!-- ============================================================== -->
-        <!-- Core Spring Boot Starters (Web, Actuator, Validation)          -->
+        <!-- Core Spring Boot Starters                                      -->
         <!-- ============================================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -39,6 +39,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+        <!-- ============================================================== -->
+        <!-- Data Formats & Serialization                                   -->
+        <!-- ============================================================== -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
         <!-- ============================================================== -->
         <!-- Cloud & Discovery (Eureka)                                     -->
         <!-- ============================================================== -->
