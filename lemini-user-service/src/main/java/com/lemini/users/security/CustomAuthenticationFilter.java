@@ -1,11 +1,15 @@
 package com.lemini.users.security;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
 
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -18,7 +22,10 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lemini.users.ui.model.request.UserLoginRequestModel;
 import com.lemini.users.ui.model.response.ApiErrorResponse;
+import com.lemini.users.ui.model.response.AuthenticationResponseModel;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -89,13 +96,12 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                 .path(request.getServletPath())
                 .build();
         
-        String acceptHeader = request.getHeader("Accept");
+        String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
 
         if (acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
             response.setContentType(MediaType.APPLICATION_XML_VALUE);
             new XmlMapper().writeValue(response.getOutputStream(), errorResponse);
         } else {
-             // Default to JSON for everything else (including wildcards * / * or text/plain)
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             new ObjectMapper().writeValue(response.getOutputStream(), errorResponse);
         }
@@ -104,6 +110,35 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
+
+                CustomUser user = (CustomUser) authResult.getPrincipal();
+
+                Instant now = Instant.now();
+
+                byte[] signingKey = Base64.getDecoder().decode(SecurityConstants.getTokenSecret());
+
+                String accessToken = Jwts.builder()
+                    .subject(user.getUsername())
+                    .issuedAt(Date.from(now))
+                    .expiration(Date.from(now.plusMillis(SecurityConstants.EXPIRATION_TIME)))
+                    .signWith(Keys.hmacShaKeyFor(signingKey), Jwts.SIG.HS512)
+                    .claim("userId", user.getUserId())
+                    .compact();
+
+                response.setHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + accessToken);
+
+                AuthenticationResponseModel authResponse = new AuthenticationResponseModel(
+                    user.getUserId(), accessToken);
+
+                String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
+
+                if (acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
+                    response.setContentType(MediaType.APPLICATION_XML_VALUE);
+                    new XmlMapper().writeValue(response.getOutputStream(), authResponse);
+                } else {
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+                }
 
     }
 

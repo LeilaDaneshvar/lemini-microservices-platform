@@ -40,4 +40,4 @@ logging:
 # ===============================
 app:
     security:
-        tokenSecret: VerificationTokenSecretKeyGen98758y4563!@#$$%^^&*()_+|}{":?><,./;'[]\-=`~
+        tokenSecret: M30vObsyV/T6el2QQuGQvZS6HfrzhyUfXiyWrun3sXy6uP+TGGvrN15HRJ5z12mBuR197uaXsZuvRpV6vIiZ6w==
