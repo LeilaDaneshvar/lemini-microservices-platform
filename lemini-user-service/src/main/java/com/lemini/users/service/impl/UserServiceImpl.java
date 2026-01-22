@@ -9,6 +9,7 @@ import com.lemini.users.exceptions.UserServiceException;
 import com.lemini.users.io.entity.UserEntity;
 import com.lemini.users.io.mapper.UserEntityMapper;
 import com.lemini.users.io.repository.UserRepository;
+import com.lemini.users.security.CustomUser;
 import com.lemini.users.service.UserService;
 import com.lemini.users.shared.Utils;
 import com.lemini.users.shared.dto.UserDto;
@@ -68,7 +69,8 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
             
         //2. Return UserDetails object
-        return new User(
+        return new CustomUser(
+            userEntity.getUserId(),
             userEntity.getEmail(),
             userEntity.getEncryptedPassword(),
             userEntity.getEmailVerificationStatus(),
