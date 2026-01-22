@@ -17,7 +17,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class ApiErrorResponse {
-private int status;
+    
+    private int status;
     private String error;
     private String message;
     private String path;
