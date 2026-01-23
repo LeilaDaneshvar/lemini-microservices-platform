@@ -22,7 +22,7 @@ import lombok.AllArgsConstructor;
 public class WebSecurityConfig {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoderConfig passwordEncoder;
     private final Validator validator;
     private final MessageSource messageSource;
 
