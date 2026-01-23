@@ -16,7 +16,6 @@ import com.lemini.users.shared.dto.UserDto;
 
 import java.util.Collections;
 
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
