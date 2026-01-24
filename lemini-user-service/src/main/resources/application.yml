@@ -3,6 +3,29 @@ server:
 spring:
     application:
         name: lemini-user-service
+    
+    # H2 Database Configuration
+    datasource:
+        url: jdbc:h2:mem:testdb
+        driverClassName: org.h2.Driver
+        username: sa
+        password: password
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+        hibernate:
+            ddl-auto: update # Create/update tables automatically
+        defer-datasource-initialization: true
+        show-sql: true
+        properties:
+            hibernate:
+                '[format_sql]': true
+                '[highlight_sql]': true
+    h2:
+        console:
+            enabled: true
+            path: /h2-console
+            settings:
+                web-allow-others: true
 
 # ===============================
 # eureka configuration

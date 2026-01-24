@@ -16,6 +16,8 @@ import com.lemini.users.service.UserService;
 
 import lombok.AllArgsConstructor;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
@@ -49,8 +51,10 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable()) // stateless JWT
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.POST, "/users").permitAll() // Allow Registration
+                    .requestMatchers(PathRequest.toH2Console()).permitAll() // Allow H2 Console
                     .anyRequest().authenticated()
                 )
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // Allow frames for H2
                 .authenticationManager(authManager) // Inject the manager
                 .addFilter(customAuthenticationFilter) // Add login filter to the chain
                 .sessionManagement(session -> session
