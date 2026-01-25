@@ -9,9 +9,10 @@ import com.lemini.users.shared.dto.UserDto;
 
 public interface UserService extends UserDetailsService {
 
-    UserDto createUser(UserDto userDto);
-    //Calles by Spring Security
+    //Called by Spring Security
     @Override
     UserDetails loadUserByUsername(String email);
 
+    UserDto createUser(UserDto userDto);
+    UserDto getUserByUserId(String userId);
 }

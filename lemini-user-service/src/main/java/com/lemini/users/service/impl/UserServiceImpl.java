@@ -28,6 +28,26 @@ public class UserServiceImpl implements UserService {
     private final Utils utils;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     
+    //This method is called by Spring Security for authentication
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UserServiceException {
+        //1. Find user by email and throw exception if not found
+        UserEntity userEntity = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
+            
+        //2. Return UserDetails object
+        return new CustomUser(
+            userEntity.getUserId(),
+            userEntity.getEmail(),
+            userEntity.getEncryptedPassword(),
+            userEntity.getEmailVerificationStatus(),
+            true,
+            true,
+            true,
+            Collections.emptyList()
+        );
+    }
+
     @Transactional
     @Override
     public UserDto createUser(UserDto user) {
@@ -60,24 +80,12 @@ public class UserServiceImpl implements UserService {
         return userMapper.userEntityToUserDto(storedUser);
     }
 
-    //This method is called by Spring Security for authentication
     @Override
-    public UserDetails loadUserByUsername(String email) throws UserServiceException {
-        //1. Find user by email and throw exception if not found
-        UserEntity userEntity = userRepository.findByEmail(email)
+    public UserDto getUserByUserId(String userId) {
+        UserEntity userEntity = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
-            
-        //2. Return UserDetails object
-        return new CustomUser(
-            userEntity.getUserId(),
-            userEntity.getEmail(),
-            userEntity.getEncryptedPassword(),
-            userEntity.getEmailVerificationStatus(),
-            true,
-            true,
-            true,
-            Collections.emptyList()
-        );
-    }
 
+        return userMapper.userEntityToUserDto(userEntity);
+    }
+    
 }
