@@ -123,4 +123,49 @@ public class UserServiceImplTest {
         verify(userRepository, never()).save(any(UserEntity.class)); 
     }
 
+    @Test
+    void testLoadUserByUsername_HappyPath() {
+        // Given
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(userEntity));
+        // When
+        var userDetails = userService.loadUserByUsername("test@test.com");
+
+        // Then
+        assertNotNull(userDetails);
+        assertEquals(userEntity.getEmail(), userDetails.getUsername());
+        assertEquals(userEntity.getEncryptedPassword(), userDetails.getPassword());
+    }
+
+    @Test
+    void testLoadUserByUsername_UserNotFound() {
+        // Given
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        // When & Then
+        UserServiceException exception = assertThrows(UserServiceException.class,() -> { 
+            userService.loadUserByUsername("nonexistent@example.com");});
+        assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND,exception.getErrorType());
+    }
+
+    @Test
+    void testGetUserByUserId_HappyPath() {
+        // Given
+        when(userRepository.findByUserId(anyString())).thenReturn(Optional.of(userEntity));
+        when(userMapper.userEntityToUserDto(any(UserEntity.class))).thenReturn(userDto);
+        // When
+        var user = userService.getUserByUserId("user123");  
+        // Then
+        assertNotNull(user);
+        assertEquals("user1", user.firstName());
+    }
+
+    @Test
+    void testGetUserByUserId_UserNotFound() {
+        // Given
+        when(userRepository.findByUserId(anyString())).thenReturn(Optional.empty());
+        // When & Then
+        UserServiceException exception = assertThrows(UserServiceException.class,() -> {
+        userService.getUserByUserId("nonexistentUserId");});
+        assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND,exception.getErrorType());
+    }
+
 }
