@@ -60,4 +60,20 @@ public class UserRepositoryTest {
         Optional<UserEntity> foundUserOptional = userRepository.findByEmail(email);
         assertTrue(foundUserOptional.isEmpty());
     }
+
+    @Test
+    void testFindByUserId() {
+        String userId = "user1publicId";
+        Optional<UserEntity> foundUserOptional = userRepository.findByUserId(userId);
+        assertTrue(foundUserOptional.isPresent());
+        UserEntity foundUser = foundUserOptional.get();
+        assertEquals(userId, foundUser.getUserId());
+    }
+
+    @Test
+    void testFindByUserId_NotFound() {
+        String userId = "nonexistentUserId";
+        Optional<UserEntity> foundUserOptional = userRepository.findByUserId(userId);
+        assertTrue(foundUserOptional.isEmpty());
+    }
 }
