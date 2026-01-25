@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.lemini.users.ui.model.request.UserLoginRequestModel;
 import com.lemini.users.ui.model.response.ApiErrorResponse;
 import com.lemini.users.ui.model.response.AuthenticationResponseModel;
@@ -53,7 +54,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
             if (contentType != null && contentType.contains(MediaType.APPLICATION_XML_VALUE)) {
                 loginRequest = new XmlMapper().readValue(request.getInputStream(), UserLoginRequestModel.class);
             } else {
-                loginRequest = new ObjectMapper().readValue(request.getInputStream(), UserLoginRequestModel.class);
+                loginRequest = new ObjectMapper().registerModule(new JavaTimeModule()).readValue(request.getInputStream(), UserLoginRequestModel.class);
             }
 
             // Validation
@@ -68,8 +69,9 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                             loginRequest.password(),
                             new ArrayList<>()));
 
+        } catch (AuthenticationException e) {
+            throw e;
         } catch (Exception e) {
-
             throw new AuthenticationServiceException(e.getMessage(), e);
         }
     }
@@ -100,10 +102,10 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
         if (acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
             response.setContentType(MediaType.APPLICATION_XML_VALUE);
-            new XmlMapper().writeValue(response.getOutputStream(), errorResponse);
+            new XmlMapper().registerModule(new JavaTimeModule()).writeValue(response.getOutputStream(), errorResponse);
         } else {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            new ObjectMapper().writeValue(response.getOutputStream(), errorResponse);
+            new ObjectMapper().registerModule(new JavaTimeModule()).writeValue(response.getOutputStream(), errorResponse);
         }
     }
 
@@ -134,10 +136,10 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
                 if (acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
                     response.setContentType(MediaType.APPLICATION_XML_VALUE);
-                    new XmlMapper().writeValue(response.getOutputStream(), authResponse);
+                    new XmlMapper().registerModule(new JavaTimeModule()).writeValue(response.getOutputStream(), authResponse);
                 } else {
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+                    new ObjectMapper().registerModule(new JavaTimeModule()).writeValue(response.getOutputStream(), authResponse);
                 }
 
     }
