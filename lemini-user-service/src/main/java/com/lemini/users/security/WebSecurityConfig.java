@@ -50,7 +50,7 @@ public class WebSecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // stateless JWT
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(HttpMethod.POST, "/users").permitAll() // Allow Registration
+                    .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll() // Allow Registration
                     .requestMatchers(PathRequest.toH2Console()).permitAll() // Allow H2 Console
                     .anyRequest().authenticated()
                 )
