@@ -9,10 +9,12 @@ import com.lemini.users.ui.mapper.UserRestMapper;
 import com.lemini.users.ui.model.request.AddressRequestModel;
 import com.lemini.users.ui.model.request.UserRequestModel;
 import com.lemini.users.ui.model.response.UserRest;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class UserControllerTest {
 
     @Autowired
@@ -141,5 +144,36 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestModel)))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("Get /users/{userId} - 200 OK: Successful retrieval of user profile by userId")
+    void getUser_whenUserIdExists_returns200() throws Exception {
+        // Arrange
+        String userId = "existing-user-id";
+        UserDto userDto = new UserDto(
+            1L, userId, "Alice", "Smith", "alice.smith@example.com", "Password123!", "encryptedPass", "token", true, Collections.emptyList()
+        );
+        UserRest userRest = new UserRest(
+            userId, "Alice", "Smith", "alice.smith@example.com", Collections.emptyList()
+        );
+        given(userService.getUserByUserId(userId)).willReturn(userDto);
+        given(userRestMapper.userDtoToUserRest(userDto)).willReturn(userRest);
+        // Act & Assert
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/users/{userId}", userId)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+    @Test
+    @DisplayName("Get /users/{userId} - 404 Not Found: UserId does not exist")
+    void getUser_whenUserIdNotExists_returns404() throws Exception {
+        // Arrange
+        String userId = "nonexistent-user-id";
+        given(userService.getUserByUserId(userId))
+            .willThrow(new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
+        // Act & Assert
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/users/{userId}", userId)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }
