@@ -38,6 +38,8 @@ public class GlobalExceptionHandler {
                 return HttpStatus.CONFLICT;
             case VALIDATION_ERROR:
                 return HttpStatus.BAD_REQUEST;
+            case INVALID_TOKEN:
+                return HttpStatus.UNAUTHORIZED;
             default:
                 return HttpStatus.INTERNAL_SERVER_ERROR;
         }
