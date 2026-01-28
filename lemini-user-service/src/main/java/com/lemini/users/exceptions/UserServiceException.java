@@ -10,7 +10,8 @@ public class UserServiceException extends RuntimeException {
     public enum UserErrorType {
         USER_NOT_FOUND("{user.err.not_found}"),
         EMAIL_ALREADY_EXISTS("{user.err.email_exists}"),
-        VALIDATION_ERROR("{user.err.validation}");
+        VALIDATION_ERROR("{user.err.validation}"), 
+        INVALID_TOKEN("{user.err.invalid_token}");
 
         private final String defaultMessage;
 
