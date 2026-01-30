@@ -15,6 +15,8 @@ import com.lemini.users.service.UserService;
 import com.lemini.users.shared.dto.UserDto;
 
 import io.jsonwebtoken.JwtParser;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,21 +27,20 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
     private final UserService userService;
     private final JwtParser jwtParser;
-    
+
     @Qualifier("handlerExceptionResolver")
     private final HandlerExceptionResolver resolver;
 
- 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-       String header = request.getHeader(SecurityConstants.HEADER_STRING);
+        String header = request.getHeader(SecurityConstants.HEADER_STRING);
 
         if (header == null || !header.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             chain.doFilter(request, response);
@@ -60,7 +61,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private UsernamePasswordAuthenticationToken doAuthorization(HttpServletRequest request) {
 
         String token = request.getHeader(SecurityConstants.HEADER_STRING)
-                              .replace(SecurityConstants.TOKEN_PREFIX, "");
+                .replace(SecurityConstants.TOKEN_PREFIX, "");
 
         try {
             String userId = jwtParser
@@ -68,15 +69,16 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     .getPayload()
                     .getSubject();
 
-            if (userId == null) return null;
+            if (userId == null)
+                return null;
 
             UserDto userDto = userService.getUserByUserId(userId);
-            
+
             // Return token with user details and empty authorities list
             return new UsernamePasswordAuthenticationToken(userDto, null, List.of());
 
         } catch (UserServiceException e) {
-            throw e; // 404 
+            throw e; // 404
         } catch (Exception e) {
             // Catch ExpiredJwtException, SignatureException, etc. //401
             throw new UserServiceException(UserServiceException.UserErrorType.INVALID_TOKEN);
