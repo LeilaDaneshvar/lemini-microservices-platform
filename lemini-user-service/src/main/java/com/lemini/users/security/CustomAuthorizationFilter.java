@@ -2,10 +2,8 @@ package com.lemini.users.security;
 
 import java.io.IOException;
 
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -67,7 +65,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             String userId = jwtParser
                     .parseSignedClaims(token)
                     .getPayload()
-                    .getSubject();
+                    .get("userId", String.class);
 
             if (userId == null)
                 return null;
@@ -78,7 +76,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             return new UsernamePasswordAuthenticationToken(userDto, null, List.of());
 
         } catch (UserServiceException e) {
-            throw e; // 404
+            throw e; // 404 - for user not found
         } catch (Exception e) {
             // Catch ExpiredJwtException, SignatureException, etc. //401
             throw new UserServiceException(UserServiceException.UserErrorType.INVALID_TOKEN);
