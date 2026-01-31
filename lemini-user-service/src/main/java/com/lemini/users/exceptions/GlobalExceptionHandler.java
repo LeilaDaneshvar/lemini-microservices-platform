@@ -1,6 +1,8 @@
 package com.lemini.users.exceptions;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -24,6 +26,29 @@ public class GlobalExceptionHandler {
                 .status(status.value())
                 .error(status.getReasonPhrase())
                 .message(ex.getMessage())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationException(
+            AuthenticationException ex, WebRequest request) {
+
+        HttpStatus status = HttpStatus.UNAUTHORIZED; // Default 401
+        String errorMessage = "{auth.message.unauthorized}";
+
+        // Logic to switch to 400 if it was a validation/service error
+        if (ex instanceof AuthenticationServiceException) {
+            status = HttpStatus.BAD_REQUEST; // Switch to 400
+            errorMessage = "{auth.message.bad_request}";
+        }
+
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(errorMessage)
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
 
