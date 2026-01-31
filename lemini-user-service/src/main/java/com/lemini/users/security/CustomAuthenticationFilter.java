@@ -17,12 +17,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.lemini.users.ui.model.request.UserLoginRequestModel;
-import com.lemini.users.ui.model.response.ApiErrorResponse;
 import com.lemini.users.ui.model.response.AuthenticationResponseModel;
 
 import io.jsonwebtoken.Jwts;
@@ -33,16 +33,28 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-@AllArgsConstructor
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
 
     private final AuthenticationManager authenticationManager;
     private final Validator validator;
-    private final MessageSource messageSource;
+    private final HandlerExceptionResolver resolver;
 
     
+
+    public CustomAuthenticationFilter(
+        AuthenticationManager authenticationManager,
+        Validator validator,
+        @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver
+    ) {
+        super(authenticationManager);
+        this.authenticationManager = authenticationManager;
+        this.validator = validator;
+        this.resolver = resolver;
+    }
+
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
@@ -79,34 +91,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-                
-        int status = HttpServletResponse.SC_UNAUTHORIZED;
-        String errorMessage = messageSource.getMessage("auth.message.unauthorized", null, Locale.getDefault());
 
-        // Check if the failure was caused by validation (AuthenticationServiceException)
-        if (failed instanceof AuthenticationServiceException) {
-            status = HttpServletResponse.SC_BAD_REQUEST;
-            errorMessage = messageSource.getMessage("auth.message.validation_error", null, Locale.getDefault());
-        }
-
-        response.setStatus(status);
-
-        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
-                .status(status)
-                .error(errorMessage)
-                .message(failed.getMessage())
-                .path(request.getServletPath())
-                .build();
-        
-        String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
-
-        if (acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
-            response.setContentType(MediaType.APPLICATION_XML_VALUE);
-            new XmlMapper().registerModule(new JavaTimeModule()).writeValue(response.getOutputStream(), errorResponse);
-        } else {
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            new ObjectMapper().registerModule(new JavaTimeModule()).writeValue(response.getOutputStream(), errorResponse);
-        }
+        resolver.resolveException(request, response, null, failed);
     }
 
     @Override
@@ -128,7 +114,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                     .compact();
 
                 response.setHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + accessToken);
-
+                response.setStatus(HttpServletResponse.SC_OK);
+                
                 AuthenticationResponseModel authResponse = new AuthenticationResponseModel(
                     user.getUserId(), accessToken);
 
