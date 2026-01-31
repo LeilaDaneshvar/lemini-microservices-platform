@@ -90,7 +90,6 @@ public class UserControllerIntegrationTest {
     @Test
     @DisplayName("GET /users/{id} - Success: End-to-end retrieval with security")
     void getUserProfile_Success() throws Exception {
-        // TRACE: Print all users in DB before request
         mockMvc.perform(get("/api/v1/users/{userId}", userId)
             .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
             .accept(MediaType.APPLICATION_JSON))
