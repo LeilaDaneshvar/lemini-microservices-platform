@@ -88,4 +88,16 @@ public class UserServiceImpl implements UserService {
         return userMapper.userEntityToUserDto(userEntity);
     }
     
+    @Override
+    public UserDto updateUserDto(String userId, UserDto userDto) {
+        UserEntity userEntity = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
+
+        userEntity.setFirstName(userDto.firstName());
+        userEntity.setLastName(userDto.lastName());
+
+        UserEntity updatedUserEntity = userRepository.save(userEntity);
+        
+        return userMapper.userEntityToUserDto(updatedUserEntity);
+    }
 }
