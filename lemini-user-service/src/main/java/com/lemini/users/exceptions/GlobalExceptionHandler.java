@@ -55,6 +55,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
+     @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception ex) {
+        // all other exceptions
+         ApiErrorResponse error = ApiErrorResponse.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message(ex.getMessage())
+                .path("")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
     private HttpStatus getHttpStatusFromErrorType(UserServiceException.UserErrorType type) {
         switch (type) {
             case USER_NOT_FOUND:
