@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lemini.users.service.UserService;
 import com.lemini.users.shared.dto.UserDto;
 import com.lemini.users.ui.mapper.UserRestMapper;
+import com.lemini.users.ui.model.request.UpdateUserRequestModel;
 import com.lemini.users.ui.model.request.UserRequestModel;
 import com.lemini.users.ui.model.response.ApiErrorResponse;
 import com.lemini.users.ui.model.response.UserRest;
@@ -84,6 +85,11 @@ public class UserController {
         public ResponseEntity<UserRest> getUser(
                         @Parameter(description = "Public user ID", example = "user123") @PathVariable("userId") String userId) {
 
+                 // Validate userId
+                if (userId == null || userId.isEmpty()) {
+                        throw new IllegalArgumentException("{validation.user.id.required}");
+                }
+
                 // Retrieve User DTO
                 UserDto userDto = userService.getUserByUserId(userId);
 
@@ -110,16 +116,21 @@ public class UserController {
                                         MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
         public ResponseEntity<UserRest> updateUser(
                         @Parameter(description = "Public user ID", example = "user123") @PathVariable("userId") String userId,
-                        @Valid @RequestBody UserRequestModel userDetails) {
+                        @Valid @RequestBody UpdateUserRequestModel userDetails) {
+
+                // Validate userId
+                if (userId == null || userId.isEmpty()) {
+                        throw new IllegalArgumentException("{validation.user.id.required}");
+                }
 
                 // Map Request Model to DTO
-                UserDto userDto = mapper.userRequestModelToUserDto(userDetails);
+                UserDto userDto = mapper.updateUserRequestModelToUserDto(userDetails);
 
                 // Update User
                 UserDto updatedUser = userService.updateUserDto(userId, userDto);
 
                 // Map DTO to Response Model
-                UserRest returnValue = mapper.userDtoToUserRest(updatedUser);
+                UserRest returnValue = mapper.updateUserDtoToUserRest(updatedUser);
 
                 // Return Response
                 return ResponseEntity.status(HttpStatus.OK)
