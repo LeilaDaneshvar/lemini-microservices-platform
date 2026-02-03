@@ -25,10 +25,10 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -36,72 +36,93 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Tag(name = "User Controller", description = "API For Managing User Profiles")
 public class UserController {
 
-    private final UserService userService;
-    private final UserRestMapper mapper;
+        private final UserService userService;
+        private final UserRestMapper mapper;
 
-    @Operation(summary = "Create User profile", description = "Create a new user with personal details and addresses")
-    @ApiResponses(value = {
-            // Senario 1: Successful Creation
-            @ApiResponse(responseCode = "201", description = "User created successfully"),
+        @Operation(summary = "Create User profile", description = "Create a new user with personal details and addresses")
+        @ApiResponses(value = {
+                        // Senario 1: Successful Creation
+                        @ApiResponse(responseCode = "201", description = "User created successfully"),
 
-            // Senario 2: Error
-            @ApiResponse(responseCode = "400", 
-            description = "Validation Error (e.g. Invalid email format, missing fields)", 
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+                        // Senario 2: Error
+                        @ApiResponse(responseCode = "400", description = "Validation Error (e.g. Invalid email format, missing fields)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
 
-            @ApiResponse(responseCode = "409", 
-            description = "Conflict (Email already exists)", 
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+                        @ApiResponse(responseCode = "409", description = "Conflict (Email already exists)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
 
-    })
-    @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }, produces = {
-            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<UserRest> createUser(@Valid @RequestBody UserRequestModel userDetails) {
+        })
+        @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }, produces = {
+                        MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+        public ResponseEntity<UserRest> createUser(@Valid @RequestBody UserRequestModel userDetails) {
 
-        // Map Request Model to DTO
-        UserDto userDto = mapper.userRequestModelToUserDto(userDetails);
+                // Map Request Model to DTO
+                UserDto userDto = mapper.userRequestModelToUserDto(userDetails);
 
-        // Create User
-        UserDto createdUser = userService.createUser(userDto);
+                // Create User
+                UserDto createdUser = userService.createUser(userDto);
 
-        // Map DTO to Response Model
-        UserRest returnValue = mapper.userDtoToUserRest(createdUser);
+                // Map DTO to Response Model
+                UserRest returnValue = mapper.userDtoToUserRest(createdUser);
 
-        // Return Response
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(returnValue);
-    }
+                // Return Response
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(returnValue);
+        }
 
-    @Operation(summary = "Get User info by public Id ", 
-                description = "Retrieve user profile information using the public user ID for logged in user",
-                        security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-            // Senario 1: Successful Retrieval
-            @ApiResponse(responseCode = "200", description = "User profile retrieved successfully"),
+        @Operation(summary = "Get User info by public Id ", description = "Retrieve user profile information using the public user ID for logged in user", security = @SecurityRequirement(name = "bearerAuth"))
+        @ApiResponses(value = {
+                        // Senario 1: Successful Retrieval
+                        @ApiResponse(responseCode = "200", description = "User profile retrieved successfully"),
 
-            // Senario 2: Error
-            @ApiResponse(responseCode = "404", 
-            description = "User Not Found", 
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+                        // Senario 2: Error
+                        @ApiResponse(responseCode = "404", description = "User Not Found", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
 
-            @ApiResponse(responseCode = "401", 
-            description = "Unauthorized (Invalid or missing authentication token)", 
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+                        @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
 
-    })
-    @GetMapping(path = "{userId}", produces = {
-            MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<UserRest> getUser(@Parameter(description = "Public user ID", example = "user123") @PathVariable("userId") String userId) {
-        
-        // Retrieve User DTO
-        UserDto userDto = userService.getUserByUserId(userId);
+        })
+        @GetMapping(path = "{userId}", produces = {
+                        MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+        public ResponseEntity<UserRest> getUser(
+                        @Parameter(description = "Public user ID", example = "user123") @PathVariable("userId") String userId) {
 
-        // Map DTO to Response Model
-        UserRest returnValue = mapper.userDtoToUserRest(userDto);
+                // Retrieve User DTO
+                UserDto userDto = userService.getUserByUserId(userId);
 
-        // Return Response
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(returnValue);
-    }
-    
+                // Map DTO to Response Model
+                UserRest returnValue = mapper.userDtoToUserRest(userDto);
+
+                // Return Response
+                return ResponseEntity.status(HttpStatus.OK)
+                                .body(returnValue);
+        }
+
+        @Operation(summary = "Update User info by public Id ", description = "Update user profile information using the public user ID for logged in user", security = @SecurityRequirement(name = "bearerAuth"))
+        @ApiResponses(value = {
+                        // Senario 1: Successful Update
+                        @ApiResponse(responseCode = "200", description = "User profile updated successfully"),
+                        // Senario 2: Error
+                        @ApiResponse(responseCode = "404", description = "User Not Found", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+
+                        @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+
+        })
+        @PutMapping(path = "{userId}", consumes = { MediaType.APPLICATION_JSON_VALUE,
+                        MediaType.APPLICATION_XML_VALUE }, produces = {
+                                        MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+        public ResponseEntity<UserRest> updateUser(
+                        @Parameter(description = "Public user ID", example = "user123") @PathVariable("userId") String userId,
+                        @Valid @RequestBody UserRequestModel userDetails) {
+
+                // Map Request Model to DTO
+                UserDto userDto = mapper.userRequestModelToUserDto(userDetails);
+
+                // Update User
+                UserDto updatedUser = userService.updateUserDto(userId, userDto);
+
+                // Map DTO to Response Model
+                UserRest returnValue = mapper.userDtoToUserRest(updatedUser);
+
+                // Return Response
+                return ResponseEntity.status(HttpStatus.OK)
+                                .body(returnValue);
+        }
 }
