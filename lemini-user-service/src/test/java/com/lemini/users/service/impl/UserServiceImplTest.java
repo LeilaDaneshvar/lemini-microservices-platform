@@ -42,7 +42,7 @@ public class UserServiceImplTest {
 
     @Mock
     UserEntityMapper userMapper;
-    
+
     @Mock
     Utils utils;
 
@@ -83,7 +83,7 @@ public class UserServiceImplTest {
         userEntity.setAddresses(List.of(addressEntity));
     }
 
-   @Test
+    @Test
     void testCreateUser_HappyPath() {
         // Given
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty()); // No duplicate
@@ -99,7 +99,7 @@ public class UserServiceImplTest {
         UserDto createdUser = userService.createUser(userDto);
 
         // Then
-         assertNotNull(createdUser);
+        assertNotNull(createdUser);
         assertEquals("user1", createdUser.firstName());
 
         verify(userRepository, times(1)).save(any(UserEntity.class));
@@ -108,19 +108,19 @@ public class UserServiceImplTest {
 
     }
 
-
     @Test
     void testCreateUser_DuplicateEmail() {
         // Given
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(userEntity)); // Duplicate
-        
+
         // When & Then
-        UserServiceException exception = assertThrows(UserServiceException.class,() -> { 
-            userService.createUser(userDto);});
+        UserServiceException exception = assertThrows(UserServiceException.class, () -> {
+            userService.createUser(userDto);
+        });
         ;
 
-        assertEquals(UserServiceException.UserErrorType.EMAIL_ALREADY_EXISTS,exception.getErrorType());
-        verify(userRepository, never()).save(any(UserEntity.class)); 
+        assertEquals(UserServiceException.UserErrorType.EMAIL_ALREADY_EXISTS, exception.getErrorType());
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -141,9 +141,10 @@ public class UserServiceImplTest {
         // Given
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         // When & Then
-        UserServiceException exception = assertThrows(UserServiceException.class,() -> { 
-            userService.loadUserByUsername("nonexistent@example.com");});
-        assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND,exception.getErrorType());
+        UserServiceException exception = assertThrows(UserServiceException.class, () -> {
+            userService.loadUserByUsername("nonexistent@example.com");
+        });
+        assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND, exception.getErrorType());
     }
 
     @Test
@@ -152,7 +153,7 @@ public class UserServiceImplTest {
         when(userRepository.findByUserId(anyString())).thenReturn(Optional.of(userEntity));
         when(userMapper.userEntityToUserDto(any(UserEntity.class))).thenReturn(userDto);
         // When
-        var user = userService.getUserByUserId("user123");  
+        var user = userService.getUserByUserId("user123");
         // Then
         assertNotNull(user);
         assertEquals("user1", user.firstName());
@@ -163,9 +164,54 @@ public class UserServiceImplTest {
         // Given
         when(userRepository.findByUserId(anyString())).thenReturn(Optional.empty());
         // When & Then
-        UserServiceException exception = assertThrows(UserServiceException.class,() -> {
-        userService.getUserByUserId("nonexistentUserId");});
-        assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND,exception.getErrorType());
+        UserServiceException exception = assertThrows(UserServiceException.class, () -> {
+            userService.getUserByUserId("nonexistentUserId");
+        });
+        assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND, exception.getErrorType());
+    }
+
+    @Test
+    void testupdateUserDto_HappyPath() {
+        // Given
+        when(userRepository.findByUserId(anyString())).thenReturn(Optional.of(userEntity));
+        when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
+        when(userMapper.userEntityToUserDto(any(UserEntity.class)))
+                .thenAnswer(invocation -> {
+                    UserEntity entity = invocation.getArgument(0);
+                    return new UserDto(
+                            entity.getId(),
+                            entity.getUserId(),
+                            entity.getFirstName(),
+                            entity.getLastName(),
+                            entity.getEmail(),
+                            "",
+                            entity.getEncryptedPassword(),
+                            entity.getEmailVerificationToken(),
+                            entity.getEmailVerificationStatus(),
+                            null // or map addresses if needed
+                    );
+                });
+        UserDto updatedInfo = new UserDto(
+                1L, "user123", "newFirstName", "newFamilyName", "", "", "", "", false, null);
+        // When
+        var updatedUser = userService.updateUserDto("user123", updatedInfo);
+        // Then
+        assertNotNull(updatedUser);
+        assertEquals("newFirstName", updatedUser.firstName());
+        assertEquals("newFamilyName", updatedUser.lastName());
+    }
+
+    @Test
+    void testupdateUserDto_UserNotFound() {
+        // Given
+        when(userRepository.findByUserId(anyString())).thenReturn(Optional.empty());
+        UserDto updatedInfo = new UserDto(
+                1L, "user123", "newFirstName", "newFamilyName", "", "", "", "", false, null);
+        // When & Then
+        UserServiceException exception = assertThrows(UserServiceException.class, () -> {
+            userService.updateUserDto("nonexistentUserId", updatedInfo);
+        });
+        assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND, exception.getErrorType());
     }
 
 }
