@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lemini.users.exceptions.UserServiceException;
 import com.lemini.users.service.UserService;
 import com.lemini.users.shared.dto.UserDto;
 import com.lemini.users.ui.mapper.UserRestMapper;
@@ -75,6 +76,8 @@ public class UserController {
                         @ApiResponse(responseCode = "200", description = "User profile retrieved successfully"),
 
                         // Senario 2: Error
+                        @ApiResponse(responseCode = "400", description = "Validation Error", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+                        
                         @ApiResponse(responseCode = "404", description = "User Not Found", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
 
                         @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -87,7 +90,7 @@ public class UserController {
 
                  // Validate userId
                 if (userId == null || userId.isEmpty()) {
-                        throw new IllegalArgumentException("{validation.user.id.required}");
+                        throw new UserServiceException(UserServiceException.UserErrorType.BAD_REQUEST);
                 }
 
                 // Retrieve User DTO
@@ -106,6 +109,8 @@ public class UserController {
                         // Senario 1: Successful Update
                         @ApiResponse(responseCode = "200", description = "User profile updated successfully"),
                         // Senario 2: Error
+                        @ApiResponse(responseCode = "400", description = "Validation Error", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+
                         @ApiResponse(responseCode = "404", description = "User Not Found", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
 
                         @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -120,7 +125,7 @@ public class UserController {
 
                 // Validate userId
                 if (userId == null || userId.isEmpty()) {
-                        throw new IllegalArgumentException("{validation.user.id.required}");
+                        throw new UserServiceException(UserServiceException.UserErrorType.BAD_REQUEST);
                 }
 
                 // Map Request Model to DTO
