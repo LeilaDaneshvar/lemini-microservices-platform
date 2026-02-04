@@ -3,9 +3,14 @@ package com.lemini.users.exceptions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.lemini.users.ui.model.response.ApiErrorResponse;
 
@@ -55,13 +60,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex) {
+    @ExceptionHandler({ MethodArgumentNotValidException.class, IllegalArgumentException.class, MissingPathVariableException.class,
+            MethodArgumentTypeMismatchException.class, NoHandlerFoundException.class })
+    public ResponseEntity<?> handleBadRequestExceptions(Exception ex) {
 
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(ex.getMessage())
+                .path("")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<?> handleNoResourceFound(Exception ex) {
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("Invalid or missing userId in path")
                 .path("")
                 .build();
 
@@ -91,6 +109,8 @@ public class GlobalExceptionHandler {
                 return HttpStatus.BAD_REQUEST;
             case INVALID_TOKEN:
                 return HttpStatus.UNAUTHORIZED;
+            case BAD_REQUEST:
+                return HttpStatus.BAD_REQUEST;
             default:
                 return HttpStatus.INTERNAL_SERVER_ERROR;
         }
