@@ -100,4 +100,12 @@ public class UserServiceImpl implements UserService {
         
         return userMapper.userEntityToUserDto(updatedUserEntity);
     }
+
+    @Override
+    public void deleteUserByUserId(String userId) {
+        UserEntity userEntity = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
+        
+            userRepository.delete(userEntity);
+    }
 }
