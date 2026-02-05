@@ -91,13 +91,34 @@ public class UserControllerIntegrationTest {
     @DisplayName("GET /users/{id} - Success: End-to-end retrieval with security")
     void getUserProfile_Success() throws Exception {
         mockMvc.perform(get("/api/v1/users/{userId}", userId)
-            .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
-            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.userId").value(userId))
-            .andExpect(jsonPath("$.email").value("leila@example.com"))
-            // CRITICAL: Ensure password fields are NOT in the response body
-            .andExpect(jsonPath("$.password").doesNotExist())
-            .andExpect(jsonPath("$.encryptedPassword").doesNotExist());
+                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(userId))
+                .andExpect(jsonPath("$.email").value("leila@example.com"))
+                // CRITICAL: Ensure password fields are NOT in the response body
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.encryptedPassword").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("PUT /users/{id} - success: End-to-end update with security")
+    void updateUserProfile_Success() throws Exception {
+        String updateJson = """
+                {
+                    "firstName": "LeilaUpdated",
+                    "lastName": "DaneshvarUpdated"
+                }
+                """;
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                .put("/api/v1/users/{userId}", userId)
+                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateJson)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("LeilaUpdated"))
+                .andExpect(jsonPath("$.lastName").value("DaneshvarUpdated"));
     }
 }

@@ -221,12 +221,13 @@ public class UserControllerTest {
                 "Bob",
                 "Johnson");
         UserDto userDto = new UserDto(
-                0L, "userId", "Bob", "Johnson", "bob.johnson@example.com", "Password123!", "encryptedPass", "token", true,
+                0L, "userId", "Bob", "Johnson", "bob.johnson@example.com", "Password123!", "encryptedPass", "token",
+                true,
                 List.of());
         given(userRestMapper.updateUserRequestModelToUserDto(any(UpdateUserRequestModel.class))).willReturn(userDto);
         given(userService.updateUserDto(any(String.class), any(UserDto.class)))
                 .willThrow(new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
-       // Act & Assert
+        // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/api/v1/users/{userId}", userId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -235,7 +236,7 @@ public class UserControllerTest {
 
     }
 
- @Test
+    @Test
     @DisplayName("Put /users/{userId} - 400 Bad Request: Attempt to update non-existent user")
     void updateUser_whenInvalidData_returns400() throws Exception {
         // Arrange
