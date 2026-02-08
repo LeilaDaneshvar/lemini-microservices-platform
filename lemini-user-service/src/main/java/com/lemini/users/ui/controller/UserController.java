@@ -13,8 +13,12 @@ import com.lemini.users.ui.mapper.UserRestMapper;
 import com.lemini.users.ui.model.request.UpdateUserRequestModel;
 import com.lemini.users.ui.model.request.UserRequestModel;
 import com.lemini.users.ui.model.response.ApiErrorResponse;
+import com.lemini.users.ui.model.response.ResponseStatusModel;
+import com.lemini.users.ui.model.response.ResponseStatusName;
+import com.lemini.users.ui.model.response.ResponseStatusResult;
 import com.lemini.users.ui.model.response.UserRest;
 
+import brave.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,6 +33,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -77,7 +82,7 @@ public class UserController {
 
                         // Senario 2: Error
                         @ApiResponse(responseCode = "400", description = "Validation Error", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-                        
+
                         @ApiResponse(responseCode = "404", description = "User Not Found", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
 
                         @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -88,7 +93,7 @@ public class UserController {
         public ResponseEntity<UserRest> getUser(
                         @Parameter(description = "Public user ID", example = "user123") @PathVariable("userId") String userId) {
 
-                 // Validate userId
+                // Validate userId
                 if (userId == null || userId.isEmpty()) {
                         throw new UserServiceException(UserServiceException.UserErrorType.BAD_REQUEST);
                 }
@@ -141,4 +146,40 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.OK)
                                 .body(returnValue);
         }
+
+        @Operation(summary = "Delete User by public Id ", description = "Delete user profile using the public user ID for logged in user", security = @SecurityRequirement(name = "bearerAuth"))
+        @ApiResponses(value = {
+                        // Senario 1: Successful Deletion
+                        @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+                        // Senario 2: Error
+                        @ApiResponse(responseCode = "400", description = "Validation Error", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+                        
+                        @ApiResponse(responseCode = "404", description = "User Not Found", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+                        
+                        @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+        })
+        @DeleteMapping(path = "{userId}")
+        public ResponseEntity<ResponseStatusModel> deleteUser(
+                        @Parameter(description = "Public user ID", example = "user123") @PathVariable("userId") String userId) {
+
+                // Validate userId
+                if (userId == null || userId.isEmpty()) {
+                        throw new UserServiceException(UserServiceException.UserErrorType.BAD_REQUEST);
+                }
+
+                // Delete User
+                userService.deleteUserByUserId(userId);
+
+                // Prepare Response Status Model
+                ResponseStatusModel responseStatus = ResponseStatusModel.builder()
+                                .status(ResponseStatusResult.SUCCESS.name())
+                                .name(ResponseStatusName.DELETE.name())
+                                .result("User deleted successfully")
+                                .build();
+
+                // Return Response
+                return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                                .body(responseStatus);
+        }
+
 }
