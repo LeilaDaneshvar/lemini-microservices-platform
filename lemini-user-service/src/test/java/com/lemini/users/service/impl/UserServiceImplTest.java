@@ -214,4 +214,26 @@ public class UserServiceImplTest {
         assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND, exception.getErrorType());
     }
 
+    @Test
+    void testDeleteUser_HappyPath() {
+        // Given
+        when(userRepository.findByUserId(anyString())).thenReturn(Optional.of(userEntity));
+        // When
+        userService.deleteUserByUserId("user123");
+        // Then
+        verify(userRepository, times(1)).delete(any(UserEntity.class));
+    }
+
+    @Test
+    void testDeleteUser_UserNotFound() {
+        // Given
+        when(userRepository.findByUserId(anyString())).thenReturn(Optional.empty());
+        // When & Then
+        UserServiceException exception = assertThrows(UserServiceException.class, () -> {
+            userService.deleteUserByUserId("nonexistentUserId");
+        });
+        assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND, exception.getErrorType());
+    }
+
+
 }
