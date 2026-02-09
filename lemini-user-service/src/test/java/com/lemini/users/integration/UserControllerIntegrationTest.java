@@ -121,4 +121,17 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.firstName").value("LeilaUpdated"))
                 .andExpect(jsonPath("$.lastName").value("DaneshvarUpdated"));
     }
+
+    @Test
+    @DisplayName("DELETE /users/{id} - success: End-to-end deletion with security")
+    void deleteUserProfile_Success() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                .delete("/api/v1/users/{userId}", userId)
+                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andExpect(jsonPath("$.name").value("DELETE"))
+                .andExpect(jsonPath("$.result").value("User deleted successfully"));    
+        }
 }
