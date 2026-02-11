@@ -1,6 +1,8 @@
 package com.lemini.users.service;
 
 
+import java.util.List;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -17,4 +19,5 @@ public interface UserService extends UserDetailsService {
     UserDto getUserByUserId(String userId);
     UserDto updateUserDto(String userId, UserDto userDto);
     void deleteUserByUserId(String userId);
+    List<UserDto> getUsers(int page, int limit);
 }

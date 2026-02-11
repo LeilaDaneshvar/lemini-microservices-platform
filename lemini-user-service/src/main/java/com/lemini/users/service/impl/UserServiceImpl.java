@@ -15,7 +15,9 @@ import com.lemini.users.shared.Utils;
 import com.lemini.users.shared.dto.UserDto;
 
 import java.util.Collections;
+import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -107,5 +109,17 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
         
             userRepository.delete(userEntity);
+    }
+
+    @Override
+    public List<UserDto> getUsers(int page, int limit) {
+
+        if(page > 0) page -= 1; //Spring Data JPA pages are zero indexed
+        
+        return userRepository.findAll(PageRequest.of(page, limit))
+            .stream()
+            .map(userMapper::userEntityToUserDto)
+            .toList();
+
     }
 }
