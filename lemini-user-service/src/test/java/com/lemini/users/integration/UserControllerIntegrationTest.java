@@ -32,106 +32,121 @@ import io.jsonwebtoken.security.Keys;
 @ActiveProfiles("test") // Uses application-test.properties (e.g., H2 DB)
 public class UserControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    private String validToken;
-    private final String userId = "user-123-abc";
-    private String tokenSecret;
+        private String validToken;
+        private final String userId = "user-123-abc";
+        private String tokenSecret;
 
-    @Autowired
-    private Environment env;
+        @Autowired
+        private Environment env;
 
-    @BeforeEach
-    void setup() {
-        userRepository.deleteAll();
-        tokenSecret = env.getProperty("app.security.tokenSecret");
+        @BeforeEach
+        void setup() {
+                userRepository.deleteAll();
+                tokenSecret = env.getProperty("app.security.tokenSecret");
 
-        // 1. Save a real user to the database
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUserId(userId);
-        userEntity.setFirstName("Leila");
-        userEntity.setLastName("Daneshvar");
-        userEntity.setEmail("leila@example.com");
-        userEntity.setEncryptedPassword("hashed_password_here");
-        userEntity.setEmailVerificationStatus(true);
-        userEntity.setEmailVerificationToken("some_verification_token");
+                // 1. Save a real user to the database
+                UserEntity userEntity = new UserEntity();
+                userEntity.setUserId(userId);
+                userEntity.setFirstName("Leila");
+                userEntity.setLastName("Daneshvar");
+                userEntity.setEmail("leila@example.com");
+                userEntity.setEncryptedPassword("hashed_password_here");
+                userEntity.setEmailVerificationStatus(true);
+                userEntity.setEmailVerificationToken("some_verification_token");
 
-        AddressEntity address = new AddressEntity();
-        address.setAddressId("12345");
-        address.setType("BILLING");
-        address.setCity("Tehran");
-        address.setCountry("Iran");
-        address.setStreetName("Some Street");
-        address.setPostalCode("12345");
-        address.setUserProfile(userEntity);
+                AddressEntity address = new AddressEntity();
+                address.setAddressId("12345");
+                address.setType("BILLING");
+                address.setCity("Tehran");
+                address.setCountry("Iran");
+                address.setStreetName("Some Street");
+                address.setPostalCode("12345");
+                address.setUserProfile(userEntity);
 
-        userEntity.setAddresses(List.of(address));
+                userEntity.setAddresses(List.of(address));
 
-        userRepository.save(userEntity);
+                userRepository.save(userEntity);
 
-        Instant now = Instant.now();
+                Instant now = Instant.now();
 
-        // 2. Generate a real JWT for this user
-        byte[] signingKey = Base64.getDecoder().decode(tokenSecret);
-        validToken = Jwts.builder()
-                .subject(userEntity.getEmail())
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusMillis(SecurityConstants.EXPIRATION_TIME)))
-                .signWith(Keys.hmacShaKeyFor(signingKey), Jwts.SIG.HS512)
-                .claim("userId", userId)
-                .compact();
+                // 2. Generate a real JWT for this user
+                byte[] signingKey = Base64.getDecoder().decode(tokenSecret);
+                validToken = Jwts.builder()
+                                .subject(userEntity.getEmail())
+                                .issuedAt(Date.from(now))
+                                .expiration(Date.from(now.plusMillis(SecurityConstants.EXPIRATION_TIME)))
+                                .signWith(Keys.hmacShaKeyFor(signingKey), Jwts.SIG.HS512)
+                                .claim("userId", userId)
+                                .compact();
 
-    }
+        }
 
-    @Test
-    @DisplayName("GET /users/{id} - Success: End-to-end retrieval with security")
-    void getUserProfile_Success() throws Exception {
-        mockMvc.perform(get("/api/v1/users/{userId}", userId)
-                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(userId))
-                .andExpect(jsonPath("$.email").value("leila@example.com"))
-                // CRITICAL: Ensure password fields are NOT in the response body
-                .andExpect(jsonPath("$.password").doesNotExist())
-                .andExpect(jsonPath("$.encryptedPassword").doesNotExist());
-    }
+        @Test
+        @DisplayName("GET /users/{id} - Success: End-to-end retrieval with security")
+        void getUserProfile_Success() throws Exception {
+                mockMvc.perform(get("/api/v1/users/{userId}", userId)
+                                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
+                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.userId").value(userId))
+                                .andExpect(jsonPath("$.email").value("leila@example.com"))
+                                // CRITICAL: Ensure password fields are NOT in the response body
+                                .andExpect(jsonPath("$.password").doesNotExist())
+                                .andExpect(jsonPath("$.encryptedPassword").doesNotExist());
+        }
 
-    @Test
-    @DisplayName("PUT /users/{id} - success: End-to-end update with security")
-    void updateUserProfile_Success() throws Exception {
-        String updateJson = """
-                {
-                    "firstName": "LeilaUpdated",
-                    "lastName": "DaneshvarUpdated"
-                }
-                """;
+        @Test
+        @DisplayName("PUT /users/{id} - success: End-to-end update with security")
+        void updateUserProfile_Success() throws Exception {
+                String updateJson = """
+                                {
+                                    "firstName": "LeilaUpdated",
+                                    "lastName": "DaneshvarUpdated"
+                                }
+                                """;
 
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                .put("/api/v1/users/{userId}", userId)
-                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(updateJson)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName").value("LeilaUpdated"))
-                .andExpect(jsonPath("$.lastName").value("DaneshvarUpdated"));
-    }
+                mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                .put("/api/v1/users/{userId}", userId)
+                                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(updateJson)
+                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.firstName").value("LeilaUpdated"))
+                                .andExpect(jsonPath("$.lastName").value("DaneshvarUpdated"));
+        }
 
-    @Test
-    @DisplayName("DELETE /users/{id} - success: End-to-end deletion with security")
-    void deleteUserProfile_Success() throws Exception {
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                .delete("/api/v1/users/{userId}", userId)
-                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.status").value("SUCCESS"))
-                .andExpect(jsonPath("$.name").value("DELETE"))
-                .andExpect(jsonPath("$.result").value("User deleted successfully"));    
+        @Test
+        @DisplayName("DELETE /users/{id} - success: End-to-end deletion with security")
+        void deleteUserProfile_Success() throws Exception {
+                mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                .delete("/api/v1/users/{userId}", userId)
+                                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
+                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isNoContent())
+                                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                                .andExpect(jsonPath("$.name").value("DELETE"))
+                                .andExpect(jsonPath("$.result").value("User deleted successfully"));
+        }
+
+        @Test
+        @DisplayName("GET /users - success: End-to-end paginated retrieval with security")
+        void getUsers_Paginated_Success() throws Exception {
+                mockMvc.perform(get("/api/v1/users")
+                                .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
+                                .param("page", "1")
+                                .param("limit", "10")
+                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].userId").value(userId))
+                                .andExpect(jsonPath("$[0].email").value("leila@example.com"))
+                                .andExpect(jsonPath("$[0].password").doesNotExist())
+                                .andExpect(jsonPath("$[0].encryptedPassword").doesNotExist());
         }
 }
