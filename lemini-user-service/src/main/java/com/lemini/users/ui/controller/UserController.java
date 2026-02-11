@@ -1,9 +1,12 @@
 package com.lemini.users.ui.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lemini.users.exceptions.UserServiceException;
@@ -18,7 +21,6 @@ import com.lemini.users.ui.model.response.ResponseStatusName;
 import com.lemini.users.ui.model.response.ResponseStatusResult;
 import com.lemini.users.ui.model.response.UserRest;
 
-import brave.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -82,7 +84,7 @@ public class UserController {
 
                         // Senario 2: Error
                         @ApiResponse(responseCode = "400", description = "Validation Error", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-
+                        
                         @ApiResponse(responseCode = "404", description = "User Not Found", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
 
                         @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -180,6 +182,38 @@ public class UserController {
                 // Return Response
                 return ResponseEntity.status(HttpStatus.NO_CONTENT)
                                 .body(responseStatus);
+        }
+
+        @Operation(summary = "Get list of users with pagination", description = "Retrieve a paginated list of user profiles for logged in user", security = @SecurityRequirement(name = "bearerAuth"))
+        @ApiResponses(value = {
+                        // Senario 1: Successful Retrieval
+                        @ApiResponse(responseCode = "200", description = "User profiles retrieved successfully"),
+                        // Senario 2: Error
+                        @ApiResponse(responseCode = "400", description = "Validation Error", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+                       
+                        @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+        })
+        @GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+        public ResponseEntity<List<UserRest>> getUsers(
+                        @Parameter(description = "Page number (starting from 1)", example = "1") @RequestParam(value = "page", defaultValue = "1") int page,
+                        @Parameter(description = "Number of records per page", example = "10") @RequestParam(value = "limit", defaultValue = "10") int limit) {         
+                
+                // Validate pagination parameters
+                if (page < 1 || limit < 1) {
+                        throw new UserServiceException(UserServiceException.UserErrorType.BAD_REQUEST); 
+                }
+
+                // Retrieve list of User DTOs
+                List<UserDto> userDtos = userService.getUsers(page, limit);
+
+                // Map DTOs to Response Models
+                List<UserRest> returnValue = userDtos.stream()
+                                .map(mapper::userDtoToUserRest)
+                                .toList();
+                
+                // Return Response
+                return ResponseEntity.status(HttpStatus.OK)
+                                .body(returnValue);
         }
 
 }
