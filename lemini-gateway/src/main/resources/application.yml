@@ -21,7 +21,7 @@ eureka:
 management:
     tracing:
         sampling:
-            probability: 1.0
+            probability: 1.0 # Always sample for tracing in development. it will be set to 0.1 in production
     endpoints:
         web:
             exposure:

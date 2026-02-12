@@ -24,6 +24,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- TODO: Add distributed tracing dependencies for Eureka Server -->
+         <!-- <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency> -->
     </dependencies>
 
 </project>
