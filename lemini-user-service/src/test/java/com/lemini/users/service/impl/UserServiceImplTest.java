@@ -20,6 +20,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.lemini.users.exceptions.UserServiceException;
@@ -235,5 +239,46 @@ public class UserServiceImplTest {
         assertEquals(UserServiceException.UserErrorType.USER_NOT_FOUND, exception.getErrorType());
     }
 
+    @Test
+    void testGetUsers_HappyPath() {
+        // Given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<UserEntity> page = new PageImpl<>(List.of(userEntity));
+        when(userRepository.findAll(any(Pageable.class))).thenReturn(page);
+        when(userMapper.userEntityToUserDto(any(UserEntity.class)))
+                .thenAnswer(invocation -> {
+                    UserEntity entity = invocation.getArgument(0);
+                    return new UserDto(
+                            entity.getId(),
+                            entity.getUserId(),
+                            entity.getFirstName(),
+                            entity.getLastName(),
+                            entity.getEmail(),
+                            "",
+                            entity.getEncryptedPassword(),
+                            entity.getEmailVerificationToken(),
+                            entity.getEmailVerificationStatus(),
+                            null);
+                });
+        // When
+        var users = userService.getUsers(0, 2);
+        // Then
+        assertNotNull(users);
+        assertEquals(1, users.size());
+        assertEquals("user1", users.get(0).firstName());
+    }
+
+    @Test
+    void testGetUsers_EmptyList() {
+        // Given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<UserEntity> page = new PageImpl<>(List.of());
+        when(userRepository.findAll(any(Pageable.class))).thenReturn(page);
+        // When
+        var users = userService.getUsers(0, 2);
+        // Then
+        assertNotNull(users);
+        assertEquals(0, users.size());
+    }
 
 }

@@ -294,4 +294,42 @@ public class UserControllerTest {
                                 .delete("/api/v1/users/{userId}", invalidUserId))
                                 .andExpect(status().isBadRequest());
         }
+
+        @Test
+        @DisplayName("Get /users - 200 OK: Successful retrieval of all user profiles")
+        void getAllUsers_whenUsersExist_returns200() throws Exception {
+                // Arrange
+                UserDto userDto = new UserDto(
+                                1L, "userId", "Charlie", "Brown", "charlie.brown@example.com",
+                                "password123", "encPass", "token123", false, List.of());
+                UserRest userRest = new UserRest(
+                                "userId", "Charlie", "Brown", "charlie.brown@example.com", List.of());
+                given(userService.getUsers(10,10)).willReturn(List.of(userDto));
+                given(userRestMapper.userDtoToUserRest(any(UserDto.class))).willReturn(userRest);
+                // Act & Assert
+                mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                .get("/api/v1/users")
+                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk());
+                }
+
+        @Test
+        @DisplayName("Get /users - 400 Bad Request: Triggered by validation failures")
+        void getAllUsers_whenInvalidPagination_returns400() throws Exception {
+                // Arrange
+                int invalidPage = -1; // Negative page number
+                int invalidLimit = 0; // Zero limit
+
+                // Act & Assert
+                mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                .get("/api/v1/users")
+                                .param("page", String.valueOf(invalidPage))
+                                .param("limit", String.valueOf(invalidLimit))
+                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isBadRequest());
+        }       
+
+        
+
+
 }
