@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@Component
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
