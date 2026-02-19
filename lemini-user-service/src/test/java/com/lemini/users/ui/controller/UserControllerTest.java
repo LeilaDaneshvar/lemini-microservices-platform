@@ -12,18 +12,17 @@ import com.lemini.users.ui.model.request.UpdateUserRequestModel;
 import com.lemini.users.ui.model.request.UserRequestModel;
 import com.lemini.users.ui.model.response.UserRest;
 
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -32,9 +31,12 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest(controllers = UserController.class, excludeAutoConfiguration = {
+    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration.class 
+})
 @Import(GlobalExceptionHandler.class)
-@AutoConfigureMockMvc(addFilters = false)
 public class UserControllerTest {
 
         @Autowired
@@ -304,14 +306,14 @@ public class UserControllerTest {
                                 "password123", "encPass", "token123", false, List.of());
                 UserRest userRest = new UserRest(
                                 "userId", "Charlie", "Brown", "charlie.brown@example.com", List.of());
-                given(userService.getUsers(10,10)).willReturn(List.of(userDto));
+                given(userService.getUsers(10, 10)).willReturn(List.of(userDto));
                 given(userRestMapper.userDtoToUserRest(any(UserDto.class))).willReturn(userRest);
                 // Act & Assert
                 mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                                 .get("/api/v1/users")
                                 .accept(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isOk());
-                }
+        }
 
         @Test
         @DisplayName("Get /users - 400 Bad Request: Triggered by validation failures")
@@ -327,9 +329,6 @@ public class UserControllerTest {
                                 .param("limit", String.valueOf(invalidLimit))
                                 .accept(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isBadRequest());
-        }       
-
-        
-
+        }
 
 }
