@@ -4,8 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +14,8 @@ import com.lemini.users.io.repository.AuthorityRepository;
 import com.lemini.users.io.repository.RoleRepository;
 
 @Component
-public class SetupDataLoader implements ApplicationListener<ContextRefreshedEvent> {
+public class SetupDataLoader implements CommandLineRunner {
 
-    private boolean alreadySetup = false;
 
     @Autowired
     private AuthorityRepository authorityRepository;
@@ -27,10 +25,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
     @Override
     @Transactional
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (alreadySetup) {
-            return;
-        }
+    public void run(String... args) throws Exception {
 
         // 1. Create Authtorities
         AuthorityEntity readAuthority = createAuthorityIfNotFound("READ_AUTHORITY");
@@ -41,7 +36,6 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         createRoleIfNotFound("ROLE_ADMIN", List.of(readAuthority, writeAuthority, deleteAuthority));
         createRoleIfNotFound("ROLE_USER", List.of(readAuthority));
 
-        alreadySetup = true;
     }
 
     private void createRoleIfNotFound(String name, Collection<AuthorityEntity> authorities) {
