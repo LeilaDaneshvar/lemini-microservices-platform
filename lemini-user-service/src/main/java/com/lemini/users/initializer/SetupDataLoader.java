@@ -38,6 +38,7 @@ public class SetupDataLoader implements CommandLineRunner {
 
     }
 
+    @Transactional
     private void createRoleIfNotFound(String name, Collection<AuthorityEntity> authorities) {
         roleRepository.findByName(name).ifPresentOrElse(role -> {
             // Update logic: Ensure existing roles get new authorities if added to the code
@@ -51,6 +52,7 @@ public class SetupDataLoader implements CommandLineRunner {
         });
     }
 
+    @Transactional
     private AuthorityEntity createAuthorityIfNotFound(String name) {
         return authorityRepository.findByName(name).orElseGet(() -> {
             AuthorityEntity authority = new AuthorityEntity();
