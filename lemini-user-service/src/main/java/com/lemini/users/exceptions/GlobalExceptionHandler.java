@@ -100,19 +100,13 @@ public class GlobalExceptionHandler {
     }
 
     private HttpStatus getHttpStatusFromErrorType(UserServiceException.UserErrorType type) {
-        switch (type) {
-            case USER_NOT_FOUND:
-                return HttpStatus.NOT_FOUND;
-            case EMAIL_ALREADY_EXISTS:
-                return HttpStatus.CONFLICT;
-            case VALIDATION_ERROR:
-                return HttpStatus.BAD_REQUEST;
-            case INVALID_TOKEN:
-                return HttpStatus.UNAUTHORIZED;
-            case BAD_REQUEST:
-                return HttpStatus.BAD_REQUEST;
-            default:
-                return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
+        return switch (type) {
+            case USER_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case EMAIL_ALREADY_EXISTS -> HttpStatus.CONFLICT;
+            case VALIDATION_ERROR -> HttpStatus.BAD_REQUEST;
+            case INVALID_TOKEN -> HttpStatus.UNAUTHORIZED;
+            case BAD_REQUEST -> HttpStatus.BAD_REQUEST;
+            default -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
     }
 }
