@@ -1,4 +1,4 @@
-# Epic 2: User Management Service
+# Epic 2: User Management Service — Auditing
 
 **Objective:** Implement a secure and robust Identity Management System that allows users to register, authenticate (login), and manage their profiles. This service will act as the "Source of Truth" for user identity across the LEMINI platform.
 

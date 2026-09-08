@@ -1,4 +1,4 @@
-# Epic 4: GenAI Orchestrator Service
+# Epic 4: GenAI Orchestrator Service — Deferred
 
 **Objective:** Establish the "Brain" of the LEMINI platform. This service integrates local Large Language Models (LLMs) with platform data to provide intelligent summarization, semantic search, and contextual Q&A (RAG) without relying on external cloud APIs.
 
@@ -25,18 +25,18 @@
 ## Definition of Done
 
 ### Feature Completion
-- [x] Service starts successfully and registers with the Eureka Discovery server.
-- [x] All three core AI REST endpoints (Summarize, Search, RAG) return `HTTP 200 OK` with valid JSON payloads.
+- [ ] Service starts successfully and registers with the Eureka Discovery server.
+- [ ] All three core AI REST endpoints (Summarize, Search, RAG) return `HTTP 200 OK` with valid JSON payloads.
 
 ### Event-Driven Ingestion
-- [x] Service successfully binds to a RabbitMQ queue (e.g., `lemini.ai.ingest`).
-- [x] Messages received from the queue are successfully parsed, embedded, and saved to ChromaDB without blocking the main application thread.
+- [ ] Service successfully binds to a RabbitMQ queue (e.g., `lemini.ai.ingest`).
+- [ ] Messages received from the queue are successfully parsed, embedded, and saved to ChromaDB without blocking the main application thread.
 
 ### AI Performance & Accuracy Guidelines
-- [x] **Summarization:** The model successfully reduces input text volume by at least `60%` while retaining critical core entities.
-- [x] **Semantic Search:** Search response time from ChromaDB executes in `< 500ms` for local index queries.
-- [x] **RAG Accuracy:** The AI response explicitly cites the source Document ID from the vector store to ensure data is traceable and not hallucinated.
+- [ ] **Summarization:** The model successfully reduces input text volume by at least `60%` while retaining critical core entities.
+- [ ] **Semantic Search:** Search response time from ChromaDB executes in `< 500ms` for local index queries.
+- [ ] **RAG Accuracy:** The AI response explicitly cites the source Document ID from the vector store to ensure data is traceable and not hallucinated.
 
 ### Code Quality & Privacy
-- [x] Codebase compiles cleanly with no hardcoded credentials (managed via `application.properties`).
-- [x] Distributed tracing is active; AI request spans and RabbitMQ message traces are successfully captured in Zipkin.
+- [ ] Codebase compiles cleanly with no hardcoded credentials (managed via `application.properties`).
+- [ ] Distributed tracing is active; AI request spans and RabbitMQ message traces are successfully captured in Zipkin.
