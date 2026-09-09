@@ -50,3 +50,14 @@
 ### 5. Documentation
 - [ ] OpenAPI configuration is complete; the Swagger UI features a global interactive **"Authorize"** button.
 - [ ] Endpoints can be interactively queried directly inside the Swagger interface by injecting valid tokens into the secure context.   
+
+---
+
+## Stories
+- [ ] **3.1**: RBAC & Ownership Validation (ROLE_USER/ADMIN + Self-resource protection)
+- [ ] **3.2**: Refresh Token Mechanism (Rotation & DB Storage)
+- [ ] **3.3**: Login Security & Account Locking (Failed attempts logic)
+- [ ] **3.4**: Password Reset Logic (Internal Token generation only)
+- [ ] **3.5**: 2FA (TOTP) Integration (Google Authenticator flow)
+- [ ] **3.6**: Swagger/OpenAPI Security Configuration
+- [ ] **Audit:** Epic 3 Definition of Done Verification

@@ -54,3 +54,14 @@
 ### Documentation & Database Setup
 - [x] Live API structures are dynamically exposed using Swagger/OpenAPI with clean, explicit data schemas mapping out request/response types.
 - [x] Relational database schema models initialize cleanly across development runtime environments.
+
+---
+
+## Stories
+- [x] **2.1**: User Registration API (Implementation of POST for register with BCrypt hashing).
+- [x] **2.2**: User Login API (Implementation of GET for user data).
+- [x] **2.3**: Get User Profile API (Implementation of GET for user data).
+- [x] **2.4**: Update User Profile API (Implementation of PUT for user data).
+- [x] **2.5**: Delete User API (Implementation of DELETE for user data, Admin Only).
+- [x] **2.6**: List Users Profile API (Implementation of GET for user data, Admin Only).
+- [ ] **Audit:** Epic 2 Definition of Done Verification
