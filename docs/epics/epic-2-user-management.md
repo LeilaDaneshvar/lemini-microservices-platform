@@ -2,6 +2,8 @@
 
 **Objective:** Implement a secure and robust Identity Management System that allows users to register, authenticate (login), and manage their profiles. This service will act as the "Source of Truth" for user identity across the LEMINI platform.
 
+**Target Milestone:** LEMINI Core Platform v0.1
+
 ---
 
 ## Scope
@@ -12,7 +14,7 @@
 - **Authorization:** Role-Based Access Control (Admin vs. User).
 - **Data Persistence:** Storing user data in a relational database (H2 for Dev, MySQL for Prod).
 - **Security:** Password encryption via BCrypt and API endpoints protection.
-- **Documentation:** Auto-generated API documentation using Swagger/OpenAPI.
+- **Documentation:** Auto-generated API documentation using OpenAPI.
 
 ### Moved Out
 - **JWT & Sessions:** Authentication logic details deferred to **Epic 3: Security & Identity**.

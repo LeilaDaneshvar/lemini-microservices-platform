@@ -2,6 +2,8 @@
 
 **Objective:**  Build the architectural foundation for the LEMINI Microservices Platform. This Epic provides the essential infrastructure (Gateway, Config, Registry) required to support a scalable microservices ecosystem.
 
+**Target Milestone:** LEMINI Core Platform v0.1
+
 ---
 
 ## Scope
