@@ -1,4 +1,4 @@
-# Epic 1: Microservices Infrastructure
+# Epic 1: Microservices Infrastructure — Done
 
 **Objective:**  Build the architectural foundation for the LEMINI Microservices Platform. This Epic provides the essential infrastructure (Gateway, Config, Registry) required to support a scalable microservices ecosystem.
 
