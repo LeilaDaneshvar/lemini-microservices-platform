@@ -32,3 +32,13 @@
 - [x] Services are registered and "UP" in the Eureka Dashboard.
 - [x] API Gateway successfully routes traffic to the User Service.
 - [x] Traces are successfully captured in Zipkin.
+
+---
+
+## Stories
+- [x] **1.1**: Monorepo Setup & Parent POM
+- [x] **1.2**: Config Server Implementation
+- [x] **1.3**: Service Discovery (Eureka) Implementation
+- [x] **1.4**: Spring Cloud API Gateway Implementation
+- [x] **1.5**: User Service Skeleton (Connectivity Test) 
+- [x] **1.6**: Set up Distributed Tracing with Micrometer/Zipkin) 
