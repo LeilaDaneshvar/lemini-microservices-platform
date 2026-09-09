@@ -1,4 +1,4 @@
-# Epic 3: Authentication & Security
+# Epic 3: Authentication & Security — In Progress
 
 **Objective:** Transition from basic authentication to a robust, fine-grained authorization system. This Epic ensures that users are not only authenticated ("who they say they are") but also properly authorized ("only doing what they are allowed to do").
 
