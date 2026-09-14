@@ -3,6 +3,8 @@ server:
 spring:
     application:
         name: lemini-user-service
+    messages:
+        basename: messages,ValidationMessages
     
     # H2 Database Configuration
     datasource:

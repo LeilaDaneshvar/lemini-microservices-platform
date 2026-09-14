@@ -1,6 +1,14 @@
 package com.lemini.users.exceptions;
 
+import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,6 +26,13 @@ import org.springframework.http.HttpStatus;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private final MessageSource messageSource;
+
+    public GlobalExceptionHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
     // Handle custom user service exceptions
     @ExceptionHandler(UserServiceException.class)
@@ -60,22 +75,44 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler({ MethodArgumentNotValidException.class, IllegalArgumentException.class, MissingPathVariableException.class,
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ApiErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex, WebRequest request) {
+
+        Set<String> reportedFields = new HashSet<>();
+        List<String> validationErrors = ex.getBindingResult().getFieldErrors().stream()
+            .filter(error -> reportedFields.add(error.getField()))
+            .map(error -> error.getField() + ": "
+                + messageSource.getMessage(error, LocaleContextHolder.getLocale()))
+            .toList();
+
+        ApiErrorResponse error = ApiErrorResponse.builder()
+            .status(HttpStatus.BAD_REQUEST.value())
+            .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+            .message("Validation failed")
+            .path(request.getDescription(false).replace("uri=", ""))
+            .details(validationErrors)
+            .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+        @ExceptionHandler({ IllegalArgumentException.class, MissingPathVariableException.class,
             MethodArgumentTypeMismatchException.class, NoHandlerFoundException.class })
-    public ResponseEntity<?> handleBadRequestExceptions(Exception ex) {
+        public ResponseEntity<ApiErrorResponse> handleBadRequestExceptions(Exception ex, WebRequest request) {
 
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(ex.getMessage())
-                .path("")
+                .path(request.getDescription(false).replace("uri=", ""))
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<?> handleNoResourceFound(Exception ex) {
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(Exception ex) {
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
@@ -87,13 +124,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception ex) {
-        // all other exceptions
+    public ResponseEntity<ApiErrorResponse> handleGeneralException(
+            Exception ex, WebRequest request) {
+
+        log.error("Unexpected server error", ex);
+
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message(ex.getMessage())
-                .path("")
+                .message(messageSource.getMessage("user.err.unexpected", null, LocaleContextHolder.getLocale()))
+                .path(request.getDescription(false).replace("uri=", ""))
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
