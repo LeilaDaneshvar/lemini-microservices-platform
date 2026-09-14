@@ -1,9 +1,9 @@
 package com.lemini.users.initializer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +17,14 @@ import com.lemini.users.io.repository.RoleRepository;
 public class SetupDataLoader implements CommandLineRunner {
 
 
-    @Autowired
-    private AuthorityRepository authorityRepository;
+    private final AuthorityRepository authorityRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
+
+    SetupDataLoader(AuthorityRepository authorityRepository, RoleRepository roleRepository) {
+        this.authorityRepository = authorityRepository;
+        this.roleRepository = roleRepository;
+    }
 
     @Override
     @Transactional
@@ -33,8 +36,9 @@ public class SetupDataLoader implements CommandLineRunner {
         AuthorityEntity deleteAuthority = createAuthorityIfNotFound("DELETE_AUTHORITY");
 
         // 2. Create Roles and Admin user
-        createRoleIfNotFound("ROLE_ADMIN", List.of(readAuthority, writeAuthority, deleteAuthority));
-        createRoleIfNotFound("ROLE_USER", List.of(readAuthority));
+        // use mutable lists: Hibernate's merge clears/replaces the collection in place
+        createRoleIfNotFound("ROLE_ADMIN", new ArrayList<>(List.of(readAuthority, writeAuthority, deleteAuthority)));
+        createRoleIfNotFound("ROLE_USER", new ArrayList<>(List.of(readAuthority)));
 
     }
 
