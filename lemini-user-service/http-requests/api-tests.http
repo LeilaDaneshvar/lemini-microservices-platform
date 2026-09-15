@@ -1,0 +1,231 @@
+########################################################################
+# LEMINI USER SERVICE SMOKE TESTS
+# 
+# Purpose: Verify that User Management service Rest API works end-to-end
+# Flow:
+# 1. Health and availability
+# 2. Create User
+# 3. Get User By ID - Access Protected Endpoint Without JWT
+# 4. Get Created User By ID
+# 5. List Users 
+# 6. Update User
+# 7. Get and verified updated User By ID
+# 8. Duplicate user request
+# 9. Invalid user request
+# 10. Invalid pagination request
+# 11. Delete user
+# 12. Verified deleted user
+#
+# The requests are intentionally ordered.
+# Later requests use data produced by earlier requests.
+########################################################################
+
+########################################################################
+# COMMON VARIABLES
+########################################################################
+
+# URL
+@baseUrl = http://localhost:8080/lemini-user-service
+@usersPath = /api/v1/users
+@loginPath = /api/v1/auth/login
+
+# Input
+@firstName = Smoke
+@lastName = Tester
+@updatedFirstName = Updated
+@updatedLastName = Tester
+
+@runId = 20260914-01
+@testEmail = smoke.test.{{runId}}@lemini.test
+
+@testPassword = TestPassword123!
+@wrongPassword = WrongPassword123!
+
+@city = Guelph
+@country = Canada
+@streetName = Smoke Test Street
+@postalCode = N1G2W1
+@addressType = HOME
+
+########################################################################
+# 1. SERVICE AVAILABILITY
+#
+#If it is not available, subsequent tests should not continue.
+########################################################################
+GET {{baseUrl}}/actuator/health
+Accept: application/json
+
+########################################################################
+# 2. CREATE USER
+# Status: 201 Created
+########################################################################
+# @name createUser
+POST {{baseUrl}}{{usersPath}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "firstName": "{{firstName}}",
+  "lastName": "{{lastName}}",
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}",
+  "addresses": [
+    {
+      "city": "{{city}}",
+      "country": "{{country}}",
+      "streetName": "{{streetName}}",
+      "postalCode": "{{postalCode}}",
+      "type": "{{addressType}}"
+    }
+  ]
+}
+
+@createdUserId = {{createUser.response.body.$.userId}}
+
+########################################################################
+# 3. GET USER BY ID - ACCESS PROTECTED ENDPOINT WITHOUT JWT
+# Status: 403 Forbidden
+########################################################################
+GET {{baseUrl}}{{usersPath}}/{{createdUserId}}
+Accept: application/json
+
+########################################################################
+# 4. LOGIN USER 
+# Status: 200 OK
+########################################################################
+# @name login
+POST {{baseUrl}}{{loginPath}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}"
+}
+
+@authenticatedUserId = {{login.response.body.$.userId}}
+@accessToken = {{login.response.body.$.token}}
+
+########################################################################
+# 4. LOGIN WITH WRONG PASSWORD
+# Status: 401 Unauthorized
+########################################################################
+POST {{baseUrl}}{{loginPath}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{testEmail}}",
+  "password": "{{wrongPassword}}"
+}
+
+########################################################################
+# 5. GET USER BY ID
+# Status: 200 OK 
+########################################################################
+GET {{baseUrl}}{{usersPath}}/{{authenticatedUserId}}
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+########################################################################
+# 6. GET USER LIST WITH PAGINATION
+# Status: 200 OK 
+########################################################################
+GET {{baseUrl}}{{usersPath}}?page=1&limit=10
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+########################################################################
+# 7. GET USER LIST WITH PAGINATION - INVALID PAGE
+# Status: 400 Bad Request 
+########################################################################
+GET {{baseUrl}}{{usersPath}}?page=-1&limit=10
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+########################################################################
+# 8. UPDATE USER
+# Status: 200 OK
+########################################################################
+PUT {{baseUrl}}{{usersPath}}/{{authenticatedUserId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "firstName": "{{updatedFirstName}}",
+  "lastName": "{{updatedLastName}}"
+}
+
+########################################################################
+# 9. GET USER BY ID AFTER UPDATE
+# Status: 200 OK 
+########################################################################
+GET {{baseUrl}}{{usersPath}}/{{authenticatedUserId}}
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+########################################################################
+# 10. DUPLICATE EMAIL
+# Status: 409 Conflict
+########################################################################
+# @name createUser
+POST {{baseUrl}}{{usersPath}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "firstName": "{{firstName}}",
+  "lastName": "{{lastName}}",
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}",
+  "addresses": [
+    {
+      "city": "{{city}}",
+      "country": "{{country}}",
+      "streetName": "{{streetName}}",
+      "postalCode": "{{postalCode}}",
+      "type": "{{addressType}}"
+    }
+  ]
+}
+
+########################################################################
+# 11. INVALID CREATE REQUEST
+# Status: 400 Bad Request
+########################################################################
+POST {{baseUrl}}{{usersPath}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "firstName": "{{firstName}}",
+  "lastName": "{{lastName}}",
+  "email": "{{testEmail}}",
+  "password": "123",
+  "addresses": []
+}
+
+########################################################################
+# 12. INVALID JWT
+# Status: 401 Unauthorized
+########################################################################
+GET {{baseUrl}}{{usersPath}}/{{authenticatedUserId}}
+Accept: application/json
+Authorization: Bearer invalidAccessToken
+
+########################################################################
+# 13. DELETE USER
+# Status: 200 OK 
+########################################################################
+DELETE {{baseUrl}}{{usersPath}}/{{authenticatedUserId}}
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+########################################################################
+# 14. GET USER BY ID AFTER DELETE
+# Status: 404 Not Found 
+########################################################################
+GET {{baseUrl}}{{usersPath}}/{{authenticatedUserId}}
+Accept: application/json
+Authorization: Bearer {{accessToken}}
