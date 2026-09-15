@@ -129,7 +129,7 @@ public class UserControllerIntegrationTest {
                                 .delete("/api/v1/users/{userId}", userId)
                                 .header(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + validToken)
                                 .accept(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isNoContent())
+                                .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.status").value("SUCCESS"))
                                 .andExpect(jsonPath("$.name").value("DELETE"))
                                 .andExpect(jsonPath("$.result").value("User deleted successfully"));
