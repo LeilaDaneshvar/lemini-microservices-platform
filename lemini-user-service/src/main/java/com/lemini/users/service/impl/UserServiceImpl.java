@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setUserId(utils.generateUserId(30));
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.password()));
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(userEntity.getUserId()));
-        userEntity.setEmailVerificationStatus(false);
+        userEntity.setEmailVerificationStatus(true);
 
         // 4. Set Addresses UserEntity Reference
         if(userEntity.getAddresses() != null) {

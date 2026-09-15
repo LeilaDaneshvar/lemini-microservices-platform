@@ -2,6 +2,7 @@ package com.lemini.users.exceptions;
 
 import java.util.List;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.context.MessageSource;
@@ -41,11 +42,17 @@ public class GlobalExceptionHandler {
             WebRequest request) {
 
         HttpStatus status = getHttpStatusFromErrorType(ex.getErrorType());
+        String messageKey = Objects.requireNonNull(ex.getErrorType().getMessage())
+            .replace("{", "")
+            .replace("}", "");
 
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .status(status.value())
                 .error(status.getReasonPhrase())
-                .message(ex.getMessage())
+            .message(messageSource.getMessage(
+                    Objects.requireNonNull(messageKey),
+                null,
+                LocaleContextHolder.getLocale()))
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
 
@@ -57,12 +64,12 @@ public class GlobalExceptionHandler {
             AuthenticationException ex, WebRequest request) {
 
         HttpStatus status = HttpStatus.UNAUTHORIZED; // Default 401
-        String errorMessage = "{auth.message.unauthorized}";
-
+        String errorMessage = messageSource.getMessage("auth.message.unauthorized", null, LocaleContextHolder.getLocale())
+;
         // Logic to switch to 400 if it was a validation/service error
         if (ex instanceof AuthenticationServiceException) {
             status = HttpStatus.BAD_REQUEST; // Switch to 400
-            errorMessage = "{auth.message.bad_request}";
+            errorMessage = messageSource.getMessage("auth.message.bad_request", null, LocaleContextHolder.getLocale());
         }
 
         ApiErrorResponse error = ApiErrorResponse.builder()

@@ -180,7 +180,7 @@ public class UserController {
                                 .build();
 
                 // Return Response
-                return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                return ResponseEntity.status(HttpStatus.OK)
                                 .body(responseStatus);
         }
 

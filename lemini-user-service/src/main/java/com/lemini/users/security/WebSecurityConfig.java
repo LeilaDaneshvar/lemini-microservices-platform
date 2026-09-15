@@ -77,6 +77,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable()) // stateless JWT
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll() // Allow Registration
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll() // Allow H2 Console
                         .anyRequest().authenticated())
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // Allow frames for H2
