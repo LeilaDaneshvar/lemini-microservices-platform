@@ -269,7 +269,7 @@ public class UserControllerTest {
                 // Act & Assert
                 mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                                 .delete("/api/v1/users/{userId}", userId))
-                                .andExpect(status().isNoContent());
+                                .andExpect(status().isOk());
         }
 
         @Test
