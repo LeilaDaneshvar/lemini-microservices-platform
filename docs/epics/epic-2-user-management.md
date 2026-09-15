@@ -1,4 +1,4 @@
-# Epic 2: User Management Service — Auditing
+# Epic 2: User Management Service
 
 **Objective:** Implement a secure Identity Management System that allows users to register, authenticate (login), and manage their profiles. This service will act as the "Source of Truth" for user identity across the LEMINI platform.
 
@@ -12,7 +12,7 @@
 ### In Scope
 - **User Registration:** REST API to create new users with request validation.
 - **User Profile Management:** Retrieve, update, delete, and list user profiles through REST endpoints.
-- **Basic Authentication Foundation:** Basic login functionality required to authenticate an existing user.
+- **Basic Authentication Foundation:** Login authentication with JWT issuance and bearer-token protection for secured User APIs.
 - **Data Persistence:** Store user and related profile data in an H2 relational database.
 - **Password Security:** Hash passwords using BCrypt before persistence.
 - **Validation & Privacy:** Validate inbound requests and prevent sensitive fields such as passwords from being exposed in API responses.
@@ -20,12 +20,9 @@
 
 
 ### Moved Out
-- **JWT Validation:** JWT generation, parsing, expiration, and tamper validation.
+- **Advanced JWT & Session Management:** Refresh-token lifecycle, token revocation, advanced expiration/tamper handling, and session management.
 - **Role-Based Access Control:** Role-Based Access Control (RBAC).
 - **Resource Ownership:** User ownership and self-resource authorization.
-- **Security Routing:** Spring Security authorization rules and protected/public route verification.
-- **Session Management:** Refresh-token lifecycle and session management.
-- **Logout & Revocation:** Logout and token revocation.
 - **User Account Security:** Account locking and advanced login-security controls.
 - **Multi-Factor Authentication:** 2FA and other advanced authentication mechanisms.
 
@@ -42,9 +39,9 @@
 ## Definition of Done
 
 ### Feature Completion
-- [x] **Story Verification:** All defined child user stories and their specific Acceptance Criteria (AC) are fully met.
-- [x] **Defect Verification:** No critical defects identified during audit verification in the local development environment.
-- [x] **CRUD Functionality:** Full CRUD operations for user entities are entirely functional via exposed REST endpoints.
+- [ ] **Story Verification:** All defined child user stories and their specific Acceptance Criteria (AC) are fully met.
+- [ ] **Defect Verification:** No critical defects identified during audit verification in the local development environment.
+- [ ] **CRUD Functionality:** Full CRUD operations for user entities are entirely functional via exposed REST endpoints.
 
 ### Code Quality & Privacy
 - [x] **Build Quality:** Codebase compiles cleanly with zero errors or breaking deployment warnings.
@@ -68,9 +65,9 @@
 
 ## Stories
 - [x] **2.1**: User Registration API (Implementation of POST for register with BCrypt hashing).
-- [x] **2.2**: User Login API (Implementation of GET for user data).
+- [x] **2.2**: User Login API (Authentication with email/password and JWT issuance).
 - [x] **2.3**: Get User Profile API (Implementation of GET for user data).
 - [x] **2.4**: Update User Profile API (Implementation of PUT for user data).
-- [x] **2.5**: Delete User API (Implementation of DELETE for user data, Admin Only).
-- [x] **2.6**: List Users Profile API (Implementation of GET for user data, Admin Only).
+- [x] **2.5**: Delete User API (Authenticated DELETE operation).
+- [x] **2.6**: List User Profiles API (Authenticated paginated user retrieval).
 - [ ] **Audit:** Epic 2 Definition of Done Verification
