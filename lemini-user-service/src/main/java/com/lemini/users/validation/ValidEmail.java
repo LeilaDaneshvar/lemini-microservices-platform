@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 public @interface ValidEmail {
     String message() default "{validation.email.format}";
 
+    // groups and payload are standard elements required by the Bean Validation API
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
