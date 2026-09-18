@@ -2,6 +2,7 @@ package com.lemini.users.ui.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import com.lemini.users.ui.model.response.ApiErrorResponse;
 import com.lemini.users.ui.model.response.ResponseStatusModel;
 import com.lemini.users.ui.model.response.ResponseStatusName;
 import com.lemini.users.ui.model.response.ResponseStatusResult;
+import com.lemini.users.ui.model.response.UserPageResponse;
 import com.lemini.users.ui.model.response.UserRest;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -194,7 +196,7 @@ public class UserController {
                         @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
         })
         @GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-        public ResponseEntity<List<UserRest>> getUsers(
+        public ResponseEntity<UserPageResponse> getUsers(
                         @Parameter(description = "Page number (starting from 1)", example = "1") @RequestParam(value = "page", defaultValue = "1") int page,
                         @Parameter(description = "Number of records per page", example = "10") @RequestParam(value = "limit", defaultValue = "10") int limit) {         
                 
@@ -204,16 +206,25 @@ public class UserController {
                 }
 
                 // Retrieve list of User DTOs
-                List<UserDto> userDtos = userService.getUsers(page, limit);
+                Page<UserDto> userPage = userService.getUsers(page, limit);
 
                 // Map DTOs to Response Models
-                List<UserRest> returnValue = userDtos.stream()
-                                .map(mapper::userDtoToUserRest)
-                                .toList();
+                List<UserRest> users = userPage.getContent()
+                        .stream()
+                        .map(mapper::userDtoToUserRest)
+                        .toList();
                 
                 // Return Response
-                return ResponseEntity.status(HttpStatus.OK)
-                                .body(returnValue);
+                UserPageResponse response = new UserPageResponse(
+                        users,
+                        userPage.getNumber() + 1, // convert back to API's 1-based page
+                        userPage.getSize(),
+                        userPage.getTotalElements(),
+                        userPage.getTotalPages(),
+                        userPage.hasNext()
+                );
+
+                return ResponseEntity.ok(response);
         }
 
 }

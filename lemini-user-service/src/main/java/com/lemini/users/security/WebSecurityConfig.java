@@ -55,7 +55,7 @@ public class WebSecurityConfig {
                 .getSharedObject(AuthenticationManagerBuilder.class);
 
         authenticationManagerBuilder.userDetailsService(userService)
-                .passwordEncoder(passwordEncoder.bCryptPasswordEncoder());
+                .passwordEncoder(passwordEncoder.passwordEncoder());
 
         return authenticationManagerBuilder.build();
     }
