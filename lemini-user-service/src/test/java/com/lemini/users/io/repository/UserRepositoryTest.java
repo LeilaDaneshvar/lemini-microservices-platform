@@ -12,23 +12,25 @@ import java.util.Optional;
 import com.lemini.users.io.entity.AddressEntity;
 import com.lemini.users.io.entity.UserEntity;
 
-
 @DataJpaTest // This sets up an in-memory H2 DB automatically
-public class UserRepositoryTest {
+class UserRepositoryTest {
 
     @Autowired
     UserRepository userRepository;
 
+    private static final String TEST_EMAIL = "user1@example.com";
+    private static final String TEST_USER_ID = "user1publicId";
+    private static final String NONEXISTENT_EMAIL = "nonexistent@example.com";
+    private static final String NONEXISTENT_USER_ID = "nonexistentUserId";
+
     @BeforeEach
     void setUp() {
         UserEntity userEntity = new UserEntity();
-        userEntity.setUserId("user1publicId"); 
+        userEntity.setUserId(TEST_USER_ID);
         userEntity.setFirstName("User1");
         userEntity.setLastName("Family1");
-        userEntity.setEmail("user1@example.com");
+        userEntity.setEmail(TEST_EMAIL);
         userEntity.setEncryptedPassword("encryptedPassword");
-
-        List<AddressEntity> addresses = List.of();
 
         AddressEntity address = new AddressEntity();
         address.setAddressId("address1Id");
@@ -38,7 +40,7 @@ public class UserRepositoryTest {
         address.setPostalCode("12345");
         address.setStreetName("123 Main St");
         address.setUserProfile(userEntity);
-        addresses = List.of(address);
+        List<AddressEntity> addresses = List.of(address);
 
         userEntity.setAddresses(addresses);
 
@@ -46,34 +48,46 @@ public class UserRepositoryTest {
     }
 
     @Test
-    void testFindByEmail() {
-        String email = "user1@example.com";
+    void findByEmail_whenUserExists_shouldReturnUser() {
+        // When
+        String email = TEST_EMAIL;
         Optional<UserEntity> foundUserOptional = userRepository.findByEmail(email);
+
+        // Then
         assertTrue(foundUserOptional.isPresent());
         UserEntity foundUser = foundUserOptional.get();
         assertEquals(email, foundUser.getEmail());
     }
 
     @Test
-    void testFindByEmail_NotFound() {
-        String email = "nonexistent@example.com";
+    void findByEmail_whenUserDoesNotExist_shouldReturnEmpty() {
+        // When
+        String email = NONEXISTENT_EMAIL;
         Optional<UserEntity> foundUserOptional = userRepository.findByEmail(email);
+
+        // Then
         assertTrue(foundUserOptional.isEmpty());
     }
 
     @Test
-    void testFindByUserId() {
-        String userId = "user1publicId";
+    void findByUserId_whenUserExists_shouldReturnUser() {
+        // When
+        String userId = TEST_USER_ID;
         Optional<UserEntity> foundUserOptional = userRepository.findByUserId(userId);
+
+        // Then
         assertTrue(foundUserOptional.isPresent());
         UserEntity foundUser = foundUserOptional.get();
         assertEquals(userId, foundUser.getUserId());
     }
 
     @Test
-    void testFindByUserId_NotFound() {
-        String userId = "nonexistentUserId";
+    void findByUserId_whenUserDoesNotExist_shouldReturnEmpty() {
+        // When
+        String userId = NONEXISTENT_USER_ID;
         Optional<UserEntity> foundUserOptional = userRepository.findByUserId(userId);
+
+        // Then
         assertTrue(foundUserOptional.isEmpty());
     }
 }
