@@ -154,7 +154,7 @@ public class UserController {
         @Operation(summary = "Delete User by public Id ", description = "Delete user profile using the public user ID for logged in user", security = @SecurityRequirement(name = "bearerAuth"))
         @ApiResponses(value = {
                         // Senario 1: Successful Deletion
-                        @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+                        @ApiResponse(responseCode = "200", description = "User deleted successfully"),
                         // Senario 2: Error
                         @ApiResponse(responseCode = "400", description = "Validation Error", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
                         
