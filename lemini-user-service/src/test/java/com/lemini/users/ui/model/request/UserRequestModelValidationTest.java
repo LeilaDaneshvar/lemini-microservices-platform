@@ -24,42 +24,118 @@ class UserRequestModelValidationTest {
     }
 
     private UserRequestModel createValidUser() {
-        // Helper to create a user where only the email needs to be changed for testing
-        AddressRequestModel address = new AddressRequestModel("City", "Country", "Street", "12345", AddressType.BILLING);
+
         return new UserRequestModel(
                 "John",
                 "Doe",
                 "john.doe@example.com",
                 "Password123!",
-                List.of(address)
-        );
+                List.of(createValidAddress()));
+
+    }
+
+    private AddressRequestModel createValidAddress() {
+
+        return new AddressRequestModel(
+                "City",
+                "Country",
+                "Street",
+                "12345",
+                AddressType.BILLING);
+
+    }
+
+    private boolean hasViolationFor(
+            Set<ConstraintViolation<UserRequestModel>> violations,
+            String field) {
+
+        return violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals(field));
     }
 
     @Test
-    void shouldPassValidationForValidEmail() {
+    void shouldPassValidationForValidUser() {
         UserRequestModel user = createValidUser();
+
         Set<ConstraintViolation<UserRequestModel>> violations = validator.validate(user);
+
         assertTrue(violations.isEmpty(), "Expected no validation errors");
+    }
+
+    @Test
+    void shouldFailValidationForInvalidFirstName() {
+        // Invalid first name
+
+        UserRequestModel user = new UserRequestModel(
+                "",
+                "Doe",
+                "john.doe@example.com",
+                "Password123!",
+                List.of(createValidAddress()));
+
+        Set<ConstraintViolation<UserRequestModel>> violations = validator.validate(user);
+
+        assertTrue(hasViolationFor(violations, "firstName"), "Expected validation error for invalid first name");
+    }
+
+    @Test
+    void shouldFailValidationForInvalidLastName() {
+        // Invalid last name
+        UserRequestModel user = new UserRequestModel(
+                "John",
+                "",
+                "john.doe@example.com",
+                "Password123!",
+                List.of(createValidAddress()));
+
+        Set<ConstraintViolation<UserRequestModel>> violations = validator.validate(user);
+
+        assertTrue(hasViolationFor(violations, "lastName"), "Expected validation error for invalid last name");
     }
 
     @Test
     void shouldFailValidationForInvalidEmail() {
         // Invalid email format
-        AddressRequestModel address = new AddressRequestModel("City", "Country", "Street", "12345", AddressType.BILLING);
         UserRequestModel user = new UserRequestModel(
                 "John",
                 "Doe",
                 "invalid-email",
                 "Password123!",
-                List.of(address)
-        );
+                List.of(createValidAddress()));
 
         Set<ConstraintViolation<UserRequestModel>> violations = validator.validate(user);
-        
-        // We expect at least one violation on the "email" path
-        boolean hasEmailError = violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("email"));
-        
-        assertTrue(hasEmailError, "Expected validation error for invalid email");
+
+        assertTrue(hasViolationFor(violations, "email"), "Expected validation error for invalid email");
     }
+
+    @Test
+    void shouldFailValidationForInvalidPassword() {
+        // Invalid password format
+        UserRequestModel user = new UserRequestModel(
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "short",
+                List.of(createValidAddress()));
+
+        Set<ConstraintViolation<UserRequestModel>> violations = validator.validate(user);
+
+        assertTrue(hasViolationFor(violations, "password"), "Expected validation error for invalid password");
+    }
+
+    @Test
+    void shouldFailValidationForEmptyAddresses() {
+        // Invalid address
+        UserRequestModel user = new UserRequestModel(
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "Password123!",
+                List.of());
+
+        Set<ConstraintViolation<UserRequestModel>> violations = validator.validate(user);
+
+        assertTrue(hasViolationFor(violations, "addresses"), "Expected validation error for invalid address");
+    }
+
 }

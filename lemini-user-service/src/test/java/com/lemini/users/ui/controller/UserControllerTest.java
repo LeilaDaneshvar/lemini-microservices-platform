@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration.class
 })
 @Import(GlobalExceptionHandler.class)
-public class UserControllerTest {
+class UserControllerTest {
 
         @Autowired
         private MockMvc mockMvc;
