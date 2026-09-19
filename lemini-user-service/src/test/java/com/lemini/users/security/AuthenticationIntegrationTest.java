@@ -24,7 +24,7 @@ import com.lemini.users.ui.model.request.UserLoginRequestModel;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-public class AuthenticationIntegrationTest {
+class AuthenticationIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -34,6 +34,9 @@ public class AuthenticationIntegrationTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -54,7 +57,7 @@ public class AuthenticationIntegrationTest {
 
         mockMvc.perform(post(SecurityConstants.SIGN_IN_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(loginRequest)))
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(HttpHeaders.AUTHORIZATION))
                 .andExpect(jsonPath("$.userId").value("test-user-id"))
@@ -67,7 +70,7 @@ public class AuthenticationIntegrationTest {
 
         mockMvc.perform(post(SecurityConstants.SIGN_IN_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(loginRequest)))
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -78,7 +81,7 @@ public class AuthenticationIntegrationTest {
 
         mockMvc.perform(post(SecurityConstants.SIGN_IN_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(loginRequest)))
-                .andExpect(status().isOk());
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isBadRequest());
     }
 }

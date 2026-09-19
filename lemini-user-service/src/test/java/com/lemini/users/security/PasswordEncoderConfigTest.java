@@ -1,17 +1,18 @@
 package com.lemini.users.security;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class PasswordEncoderConfigTest {
+class PasswordEncoderConfigTest {
 
-    PasswordEncoderConfig passwordEncoderConfig = new PasswordEncoderConfig();
-    PasswordEncoder passwordEncoder = passwordEncoderConfig.passwordEncoder();
+    private final PasswordEncoderConfig passwordEncoderConfig = new PasswordEncoderConfig();
+    private final PasswordEncoder passwordEncoder = passwordEncoderConfig.passwordEncoder();
 
     @Test
-    public void passwordEncoder_ShouldUseBCryptPasswordEncoderStrength10() {
+    public void passwordEncoder_shouldUseBCryptStrength10() {
         String rawPassword = "TestPassword123!";
 
         String encodedPassword = passwordEncoder.encode(rawPassword);
@@ -26,6 +27,7 @@ public class PasswordEncoderConfigTest {
         String encodedPassword = passwordEncoder.encode(rawPassword);
 
         assertTrue(passwordEncoder.matches(rawPassword, encodedPassword));
+        assertNotEquals(rawPassword, encodedPassword);
     }
 
 }
