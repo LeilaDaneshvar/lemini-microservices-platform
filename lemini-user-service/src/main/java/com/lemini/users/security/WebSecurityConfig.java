@@ -33,10 +33,10 @@ public class WebSecurityConfig {
     private final String tokenSecret;
 
     public WebSecurityConfig(UserService userService,
-                             PasswordEncoderConfig passwordEncoder,
-                             Validator validator,
-                             @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver,
-                             @Value("${app.security.tokenSecret}") String tokenSecret) {
+            PasswordEncoderConfig passwordEncoder,
+            Validator validator,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver,
+            @Value("${app.security.tokenSecret}") String tokenSecret) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.validator = validator;
@@ -66,10 +66,9 @@ public class WebSecurityConfig {
         AuthenticationManager authManager = authenticationManager(http);
 
         CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(
-            authManager,
-            validator,
-            resolver
-        );
+                authManager,
+                validator,
+                resolver);
 
         customAuthenticationFilter.setFilterProcessesUrl(SecurityConstants.SIGN_IN_URL);
 
@@ -79,6 +78,10 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll() // Allow Registration
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll() // Allow H2 Console
+                        .requestMatchers(
+                            "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated())
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // Allow frames for H2
                 .authenticationManager(authManager) // Inject the manager

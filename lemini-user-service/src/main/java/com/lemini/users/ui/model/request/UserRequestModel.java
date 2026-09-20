@@ -9,6 +9,8 @@ import com.lemini.users.validation.ValidEmail;
 import com.lemini.users.validation.ValidPassword;
 import com.lemini.users.validation.ValidationConstants;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
 public record UserRequestModel(
@@ -21,6 +23,11 @@ public record UserRequestModel(
     @Size(min = ValidationConstants.LAST_NAME_MIN_LENGTH, max = ValidationConstants.LAST_NAME_MAX_LENGTH, message = "{validation.lastName.size}")
     String lastName,
 
+    @Schema(
+        description = "User email address",
+        format = "email",
+        example = "user@example.com"
+    )
     @NotNull(message = "{validation.email.notNull}")
     @ValidEmail(message = "{validation.email.format}")
     @Size(max = ValidationConstants.EMAIL_MAX_LENGTH, message = "{validation.email.size}")

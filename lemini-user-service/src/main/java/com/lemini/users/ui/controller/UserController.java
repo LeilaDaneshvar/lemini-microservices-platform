@@ -162,7 +162,8 @@ public class UserController {
                         
                         @ApiResponse(responseCode = "401", description = "Unauthorized (Invalid or missing authentication token)", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
         })
-        @DeleteMapping(path = "{userId}")
+        @DeleteMapping(path = "{userId}", produces = {
+                                        MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
         public ResponseEntity<ResponseStatusModel> deleteUser(
                         @Parameter(description = "Public user ID", example = "user123") @PathVariable("userId") String userId) {
 
