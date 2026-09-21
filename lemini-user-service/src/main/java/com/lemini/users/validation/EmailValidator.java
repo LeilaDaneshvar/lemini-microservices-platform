@@ -4,11 +4,14 @@ import java.util.function.Predicate;
 
 public class EmailValidator implements Predicate<String> {
 
+    private static final String EMAIL_REGEX =
+            "^[A-Za-z0-9_%+-]+(?:\\.[A-Za-z0-9_%+-]+)*"
+          + "@"
+          + "[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)+$";
+
     @Override
     public boolean test(String email) {
-        // Basic email validation regex
-        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
-        return email != null && email.matches(emailRegex);
+        return email != null && email.matches(EMAIL_REGEX);
     }
 
 }

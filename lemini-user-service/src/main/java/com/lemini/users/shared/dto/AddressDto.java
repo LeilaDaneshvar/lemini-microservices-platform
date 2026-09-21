@@ -3,7 +3,7 @@ package com.lemini.users.shared.dto;
 import java.io.Serializable;
 
 public record AddressDto(
-    long id,
+    Long id,
     String addressId,
     String streetName,
     String city,

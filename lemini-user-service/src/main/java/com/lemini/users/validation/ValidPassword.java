@@ -13,6 +13,7 @@ import jakarta.validation.Payload;
 public @interface ValidPassword  {
     String message() default "{validation.password.strength}";
 
+    // groups and payload are standard elements required by the Bean Validation API
     Class<?>[] groups() default {};
     
     Class<? extends Payload>[] payload() default {};

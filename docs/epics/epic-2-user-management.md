@@ -1,6 +1,7 @@
-# Epic 2: User Management Service — Auditing
+# Epic 2: User Management Service
 
-**Objective:** Implement a secure and robust Identity Management System that allows users to register, authenticate (login), and manage their profiles. This service will act as the "Source of Truth" for user identity across the LEMINI platform.
+**Objective:** Implement a secure Identity Management System that allows users to register, authenticate (login), and manage their profiles. This service will act as the "Source of Truth" for user identity across the LEMINI platform.
+
 
 **Target Milestone:** LEMINI Core Platform v0.1
 
@@ -9,18 +10,21 @@
 ## Scope
 
 ### In Scope
-- **User Registration:** REST API to create new users with validation.
-- **Authentication:** Secure Login using JWT (JSON Web Tokens).
-- **Authorization:** Role-Based Access Control (Admin vs. User).
-- **Data Persistence:** Storing user data in a relational database (H2 for Dev, MySQL for Prod).
-- **Security:** Password encryption via BCrypt and API endpoints protection.
+- **User Registration:** REST API to create new users with request validation.
+- **User Profile Management:** Retrieve, update, delete, and list user profiles through REST endpoints.
+- **Basic Authentication Foundation:** Login authentication with JWT issuance and bearer-token protection for secured User APIs.
+- **Data Persistence:** Store user and related profile data in an H2 relational database.
+- **Password Security:** Hash passwords using BCrypt before persistence.
+- **Validation & Privacy:** Validate inbound requests and prevent sensitive fields such as passwords from being exposed in API responses.
 - **Documentation:** Auto-generated API documentation using OpenAPI.
 
+
 ### Moved Out
-- **JWT & Sessions:** Authentication logic details deferred to **Epic 3: Security & Identity**.
-- **Refresh Tokens:** Long-lived session management deferred to **Epic 3: Security & Identity**.
-- **Email Notifications:** Sending "Welcome" emails deferred to **Epic 5**.
-- **Forgot Password:** Password recovery flow deferred to **Epic 5**.
+- **Advanced JWT & Session Management:** Refresh-token lifecycle, token revocation, advanced expiration/tamper handling, and session management.
+- **Role-Based Access Control:** Role-Based Access Control (RBAC).
+- **Resource Ownership:** User ownership and self-resource authorization.
+- **User Account Security:** Account locking and advanced login-security controls.
+- **Multi-Factor Authentication:** 2FA and other advanced authentication mechanisms.
 
 ---
 
@@ -35,35 +39,35 @@
 ## Definition of Done
 
 ### Feature Completion
-- [x] All defined child user stories and their specific Acceptance Criteria (AC) are fully met.
-- [x] Entire component features function flawlessly in the local development environment without critical bugs.
-- [x] Full CRUD operations for user entities are entirely functional via exposed REST endpoints.
+- [ ] **Story Verification:** All defined child user stories and their specific Acceptance Criteria (AC) are fully met.
+- [ ] **Defect Verification:** No critical defects identified during audit verification in the local development environment.
+- [ ] **CRUD Functionality:** Full CRUD operations for user entities are entirely functional via exposed REST endpoints.
 
 ### Code Quality & Privacy
-- [x] Codebase compiles cleanly with zero errors or breaking deployment warnings.
-- [x] No hardcoded secrets (use application.properties).
-- [x] Sensitive data (hashed passwords) is excluded from API responses using DTOs.
+- [x] **Build Quality:** Codebase compiles cleanly with zero errors or breaking deployment warnings.
+- [x] **Configuration Management:** externalized configuration using profiles/environment variables.
+- [x] **Sensitive Data Protection:** Sensitive data (hashed passwords) is excluded from API responses using DTOs.
 
 ### Testing Verification
-- [x] **Unit Testing:** Core Service and Repository layer classes hit a branch coverage threshold of `> 80%`.
-- [x] **Integration Testing:** Edge controller endpoints are thoroughly validated using `MockMvc` setups.
-- [x] **Manual Verification:** Endpoints physically smoke-tested and verified via local `api-tests.http` script files.
+- [x] **Unit Testing:** Core service and repository business logic is covered by automated tests for primary success paths and relevant edge/error cases.
+- [x] **Integration Testing:** Exposed REST endpoints are validated using `MockMvc`, including successful requests and defined failure scenarios.
+- [x] **Manual Verification:** Epic 2 endpoints are smoke-tested using the maintained local `api-tests.http` request files.
+- [x] **Automated Test Suite:** The complete Epic 2 automated test suite passes successfully.
 
 ### Security Controls
-- [x] Inbound payloads strictly checked using bean validation constraints (`JSR-380`), and passwords are hashed prior to database commitment.
-- [x] Endpoint path filtering is actively configured to differentiate between Public and Protected resources.
+- [x] **Input Validation:** Inbound payloads are strictly validated using Jakarta Bean Validation constraints, and passwords are hashed before database persistence.
+- [x] **Endpoint Protection:** Endpoint path filtering is actively configured to differentiate between public and protected resources.
 
 ### Documentation & Database Setup
-- [x] Live API structures are dynamically exposed using Swagger/OpenAPI with clean, explicit data schemas mapping out request/response types.
-- [x] Relational database schema models initialize cleanly across development runtime environments.
-
+- [x] **API Documentation:** Live API structures are dynamically exposed using OpenAPI with clean, explicit data schemas mapping out request/response types.
+- [x] **Database Initialization:** Relational database schema models initialize cleanly across development runtime environments.
 ---
 
 ## Stories
 - [x] **2.1**: User Registration API (Implementation of POST for register with BCrypt hashing).
-- [x] **2.2**: User Login API (Implementation of GET for user data).
+- [x] **2.2**: User Login API (Authentication with email/password and JWT issuance).
 - [x] **2.3**: Get User Profile API (Implementation of GET for user data).
 - [x] **2.4**: Update User Profile API (Implementation of PUT for user data).
-- [x] **2.5**: Delete User API (Implementation of DELETE for user data, Admin Only).
-- [x] **2.6**: List Users Profile API (Implementation of GET for user data, Admin Only).
+- [x] **2.5**: Delete User API (Authenticated DELETE operation).
+- [x] **2.6**: List User Profiles API (Authenticated paginated user retrieval).
 - [ ] **Audit:** Epic 2 Definition of Done Verification

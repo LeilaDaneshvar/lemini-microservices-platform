@@ -3,7 +3,7 @@ package com.lemini.users.service.impl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import com.lemini.users.exceptions.UserServiceException;
 import com.lemini.users.io.entity.UserEntity;
@@ -11,115 +11,123 @@ import com.lemini.users.io.mapper.UserEntityMapper;
 import com.lemini.users.io.repository.UserRepository;
 import com.lemini.users.security.CustomUser;
 import com.lemini.users.service.UserService;
-import com.lemini.users.shared.Utils;
+import com.lemini.users.shared.IdGenerator;
+import com.lemini.users.shared.VerificationTokenGenerator;
 import com.lemini.users.shared.dto.UserDto;
 
 import java.util.Collections;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+    public static final int USER_ID_LENGTH = 30;
+    public static final int ADDRESS_ID_LENGTH = 30;
 
     private final UserRepository userRepository;
     private final UserEntityMapper userMapper;
-    private final Utils utils;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    
-    //This method is called by Spring Security for authentication
+    private final IdGenerator idGenerator;
+    private final VerificationTokenGenerator verificationTokenGenerator;
+    private final PasswordEncoder passwordEncoder;
+
+    // This method is called by Spring Security for authentication
     @Override
     public UserDetails loadUserByUsername(String email) throws UserServiceException {
-        //1. Find user by email and throw exception if not found
+        // 1. Find user by email and throw exception if not found
         UserEntity userEntity = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
-            
-        //2. Return UserDetails object
+                .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
+
+        // 2. Return UserDetails object
         return new CustomUser(
-            userEntity.getUserId(),
-            userEntity.getEmail(),
-            userEntity.getEncryptedPassword(),
-            userEntity.getEmailVerificationStatus(),
-            true,
-            true,
-            true,
-            Collections.emptyList()
-        );
+                userEntity.getUserId(),
+                userEntity.getEmail(),
+                userEntity.getEncryptedPassword(),
+                userEntity.getEmailVerificationStatus(),
+                true,
+                true,
+                true,
+                Collections.emptyList());
     }
 
     @Transactional
     @Override
     public UserDto createUser(UserDto user) {
 
-        // 1. Duplicate Check
-        if(userRepository.findByEmail(user.email()).isPresent()) {
+        // Duplicate Email Check
+        if (userRepository.findByEmail(user.email()).isPresent()) {
             throw new UserServiceException(UserServiceException.UserErrorType.EMAIL_ALREADY_EXISTS);
         }
-        
-        // 2. Map Record -> Entity
+
+        // Map DTO -> Entity
         UserEntity userEntity = userMapper.userDtoToUserEntity(user);
 
-        // 3. Generate User ID and Encrypted Password
-        userEntity.setUserId(utils.generateUserId(30));
-        userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.password()));
-        userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(userEntity.getUserId()));
-        userEntity.setEmailVerificationStatus(true);
-
-        // 4. Set Addresses UserEntity Reference
-        if(userEntity.getAddresses() != null) {
-            userEntity.getAddresses().forEach(address -> {
-                address.setUserProfile(userEntity);
-                address.setAddressId(utils.generateAddressId(30));
-            });
+        // Business validation - Address Validation
+        if (userEntity.getAddresses() == null || userEntity.getAddresses().isEmpty()) {
+            throw new UserServiceException(
+                    UserServiceException.UserErrorType.VALIDATION_ERROR);
         }
 
-        // 5. Save User
+        // Generate User ID and Encrypted Password
+        String userId = idGenerator.generateUserId(UserServiceImpl.USER_ID_LENGTH);
+        userEntity.setUserId(userId);
+        userEntity.setEncryptedPassword(passwordEncoder.encode(user.password()));
+        userEntity.setEmailVerificationToken(verificationTokenGenerator.generateEmailVerificationToken(userId));
+        // Email verification is not implemented yet, All new users are marked as verified by default
+        userEntity.setEmailVerificationStatus(true);
+
+        // Set Addresses UserEntity Reference
+        userEntity.getAddresses().forEach(address -> {
+            address.setUserProfile(userEntity);
+            address.setAddressId(idGenerator.generateAddressId(UserServiceImpl.ADDRESS_ID_LENGTH));
+        });
+
+        // Persist
         UserEntity storedUser = userRepository.save(userEntity);
-        
+
         return userMapper.userEntityToUserDto(storedUser);
     }
 
     @Override
     public UserDto getUserByUserId(String userId) {
         UserEntity userEntity = userRepository.findByUserId(userId)
-            .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
+                .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
 
         return userMapper.userEntityToUserDto(userEntity);
     }
-    
+
     @Override
     public UserDto updateUserDto(String userId, UserDto userDto) {
         UserEntity userEntity = userRepository.findByUserId(userId)
-            .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
+                .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
 
         userEntity.setFirstName(userDto.firstName());
         userEntity.setLastName(userDto.lastName());
 
         UserEntity updatedUserEntity = userRepository.save(userEntity);
-        
+
         return userMapper.userEntityToUserDto(updatedUserEntity);
     }
 
     @Override
     public void deleteUserByUserId(String userId) {
         UserEntity userEntity = userRepository.findByUserId(userId)
-            .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
-        
-            userRepository.delete(userEntity);
+                .orElseThrow(() -> new UserServiceException(UserServiceException.UserErrorType.USER_NOT_FOUND));
+
+        userRepository.delete(userEntity);
     }
 
     @Override
-    public List<UserDto> getUsers(int page, int limit) {
+    public Page<UserDto> getUsers(int page, int limit) {
 
-        if(page > 0) page -= 1; //Spring Data JPA pages are zero indexed
-        
-        return userRepository.findAll(PageRequest.of(page, limit))
-            .stream()
-            .map(userMapper::userEntityToUserDto)
-            .toList();
+        int pageIndex = page - 1; // API is 1-based; Spring Data is 0-based;
+
+        return userRepository.findAll(PageRequest.of(pageIndex, limit))
+                .map(userMapper::userEntityToUserDto);
 
     }
 }

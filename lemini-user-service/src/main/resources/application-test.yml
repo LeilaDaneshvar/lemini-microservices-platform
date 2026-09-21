@@ -2,7 +2,7 @@ server:
     port: 0 # Random port assignment for testing
 spring:
     application:
-        name: lemini-user-service
+        name: lemini-user-service_test
     messages:
         basename: messages,ValidationMessages
     
@@ -65,4 +65,4 @@ logging:
 # ===============================
 app:
     security:
-        tokenSecret: ${TOKEN_SECRET}
+        tokenSecret: M30vObsyV/T6el2QQuGQvZS6HfrzhyUfXiyWrun3sXy6uP+TGGvrN15HRJ5z12mBuR197uaXsZuvRpV6vIiZ6w==
