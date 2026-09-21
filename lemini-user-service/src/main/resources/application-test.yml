@@ -1,3 +1,68 @@
+server:
+    port: 0 # Random port assignment for testing
+spring:
+    application:
+        name: lemini-user-service_test
+    messages:
+        basename: messages,ValidationMessages
+    
+    # H2 Database Configuration
+    datasource:
+        url: jdbc:h2:mem:testdb
+        driverClassName: org.h2.Driver
+        username: sa
+        password: password
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+        hibernate:
+            ddl-auto: update # Create/update tables automatically
+        defer-datasource-initialization: true
+        show-sql: true
+        properties:
+            hibernate:
+                '[format_sql]': true
+                '[highlight_sql]': true
+    h2:
+        console:
+            enabled: true
+            path: /h2-console
+            settings:
+                web-allow-others: true
+
+# ===============================
+# eureka configuration
+# ===============================
+eureka:
+    client:
+        service-url:
+            defaultZone: http://localhost:8761/eureka/
+            register-with-eureka: true
+            fetch-registry: true
+    instance:
+        instance_id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+        
+# ===============================
+# management config
+# ===============================
+management:
+    tracing:
+        sampling:
+            probability: 1.0 # Always sample for tracing in development it will be set to 0.1 in production
+    endpoints:
+        web:
+            exposure:
+                include: "*"  # Expose everything
+
+# ===============================
+# logging config
+# ===============================
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+# ===============================
+# Application Specific Properties
+# ===============================
 app:
     security:
         tokenSecret: M30vObsyV/T6el2QQuGQvZS6HfrzhyUfXiyWrun3sXy6uP+TGGvrN15HRJ5z12mBuR197uaXsZuvRpV6vIiZ6w==
