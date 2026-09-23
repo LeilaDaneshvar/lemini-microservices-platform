@@ -126,7 +126,7 @@
 - [ ] **Audit:** Account Service Definition of Done Verification
 
 ### Transaction Service
-- [ ] **5.5:** Transaction Service Foundation & Persistence
+- [ ] **5.5:** Transaction Service Foundation & DynamoDB Persistence
 - [ ] **5.6:** Create Transfer API
 - [ ] **5.7:** Get Transfer API
 - [ ] **5.8:** List Account Transactions API
