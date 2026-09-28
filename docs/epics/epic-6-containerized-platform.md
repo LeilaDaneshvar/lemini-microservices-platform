@@ -1,4 +1,4 @@
-# Epic 6: Containerized Platform
+# Epic 6: Containerized Platform - Planned
 
 **Objective:** Containerize the LEMINI services and run the complete platform locally through a reproducible Docker Compose environment.
 
