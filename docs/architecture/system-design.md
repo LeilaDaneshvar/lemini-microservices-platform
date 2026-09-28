@@ -1,33 +1,185 @@
 # System Design: LEMINI Platform
 
 ## Architecture Overview
-LEMINI employs a hybrid microservices architecture. It combines **synchronous REST APIs** for immediate client responses with an **Event-Driven Architecture (EDA)** for heavy, background AI data processing. The codebase is maintained as a **Git Monorepo** using **Maven Multi-module** management to ensure unified dependency control across all services.
 
-## High-Level Data Flows
+LEMINI is designed as a microservices platform built with Java, Spring Boot, and Spring Cloud.
 
-### 1. Core Platform Flow (Synchronous Read/Write)
-This flow handles standard, real-time user requests.
-1. **Client Request:** External clients hit the **Spring Cloud Gateway**.
-2. **Routing:** The Gateway queries the **Eureka Discovery Service** to locate the target service.
-3. **Identity & Security:** The request passes through the **Security Filter Chain** for strict JWT Validation.
-4. **Execution:** The target service (e.g., User Management or AI Orchestrator) processes the request and instantly returns an HTTP response to the client.
+The platform uses synchronous REST communication for client requests and service-to-service operations. Services are independently responsible for their business capabilities and persistence.
 
-### 2. AI Data Ingestion Flow (Asynchronous ETL)
-This decoupled flow ensures that heavy AI processing never slows down core platform APIs.
-1. **Event Trigger:** A core service performs an action (e.g., User Service saves a new profile to MySQL) and instantly publishes an event message to **RabbitMQ**.
-2. **Message Brokering:** RabbitMQ securely queues the message.
-3. **Background Consumption:** The GenAI Orchestrator listens to the queue, picking up messages on a background thread.
-4. **Vectorization & Storage:** **Spring AI** chunks the data, generates vector embeddings, and stores them in **ChromaDB** for future Retrieval-Augmented Generation (RAG).
+The codebase is maintained as a Git monorepo using Maven multi-module management for shared dependency and build configuration.
 
-## Infrastructure & Observability
-* **Configuration:** All services dynamically fetch environment properties from the **Spring Config Server** on startup.
-* **Tracing:** Distributed tracing is captured via **Micrometer & Zipkin**, tracking request spans across both HTTP boundaries and RabbitMQ message queues.
+The current platform architecture includes infrastructure services for configuration, service discovery, API routing, security, and distributed tracing.
 
-## Core Tech Stack
-* **Language/Framework:** Java 17, Spring Boot 3.x
-* **Ecosystem:** Spring Cloud 2023.x
-* **AI Engine:** Spring AI, Ollama (Local Inference), ChromaDB (Vector Store)
-* **Message Broker:** RabbitMQ
-* **Security:** JWT, BCrypt, Spring Security
-* **Databases:** MySQL (Primary), H2 (Local Dev/Test)
-* **Observability:** Micrometer/Zipkin
+Future milestones extend the platform with container orchestration, cloud deployment, event-driven communication, and GenAI capabilities.
+
+### Core Application Architecture
+
+The following diagram shows the main LEMINI microservices, infrastructure components, service-to-service communication, persistence ownership, and distributed tracing.
+
+<p align="center">
+  <img src="../images/lemini-core-architecture.png"
+       alt="LEMINI Core Application Architecture"
+       width="900">
+</p>
+
+---
+
+## Core Services
+
+### API Gateway
+
+The Spring Cloud Gateway provides the external entry point to the LEMINI services.
+
+Responsibilities include:
+
+- Routing requests to the appropriate service.
+- Integrating with service discovery.
+- Providing a common entry point for platform APIs.
+- Supporting security and cross-cutting concerns where applicable.
+
+### Config Server
+
+The Spring Cloud Config Server provides centralized external configuration for platform services.
+
+Services retrieve their environment-specific configuration through the Config Server rather than maintaining duplicated configuration.
+
+### Discovery Service
+
+The Eureka Discovery Service provides service registration and discovery.
+
+Application services register themselves with Eureka and can locate other registered services without relying on hardcoded host addresses.
+
+### User Service
+
+`lemini-user-service` manages user identity and profile information.
+
+Responsibilities include:
+
+- User registration.
+- User authentication.
+- User profile management.
+- Password hashing.
+- Roles and authorities.
+- Authentication and security functionality defined by Epic 3.
+
+The User Service owns its user persistence.
+
+### Account Service
+
+`lemini-account-service` manages accounts and account state.
+
+Responsibilities include:
+
+- Account creation.
+- Account retrieval.
+- User account listing.
+- Account ownership.
+- Account balances and account status.
+
+The Account Service owns its account persistence.
+
+### Transaction Service
+
+`lemini-transaction-service` manages transfers and transaction history.
+
+Responsibilities include:
+
+- Transfer creation.
+- Transfer retrieval.
+- Account transaction history.
+- Transfer validation and processing.
+- Coordination with Account Service during transfer operations.
+
+The Transaction Service owns its transaction persistence in DynamoDB. Local development uses DynamoDB Local, while the AWS deployment uses Amazon DynamoDB.
+
+---
+
+## Database and Application Initialization
+
+The User Service uses environment-specific database configuration to support local development, automated testing, staging, and production deployment.
+
+### Environment Profiles
+
+| Profile | Database | Purpose |
+|---|---|---|
+| `demo` | H2 | Zero-setup local demonstration |
+| `test` | H2 | Automated testing |
+| `dev` | MySQL | Local development |
+| `stage` | MySQL | Staging environment |
+| `prod` | MySQL | Production environment |
+
+The `demo` profile allows the User Service to run without requiring a local MySQL installation or production secrets.
+
+Sensitive configuration for stage and production environments is provided externally.
+
+### Schema Management
+
+Flyway manages the User Service database schema and database version history.
+
+Responsibilities include:
+
+- Creating and evolving database tables.
+- Managing constraints and relationships.
+- Initializing required reference data such as roles and authorities.
+- Applying database changes through versioned migrations.
+
+Hibernate remains responsible for ORM and entity mapping. Where appropriate, Hibernate validates the Flyway-managed schema rather than creating or modifying the production schema.
+
+### Data Initialization
+
+Database initialization is separated according to the type of data being created.
+
+- **Flyway migrations** manage schema and required reference data.
+- **Demo initialization** creates demo-specific users and data when the `demo` profile is active.
+- **Administrative bootstrap** creates an initial administrator for stage or production when explicitly enabled.
+
+Production credentials and bootstrap secrets are supplied externally and are not stored in source control.
+
+### Application Startup Lifecycle
+
+The simplified User Service startup lifecycle is:
+
+```text
+SpringApplication.run(...)
+        │
+        ▼
+Load configuration and active profile
+        │
+        ▼
+Create DataSource
+        │
+        ▼
+Run Flyway migrations
+        │
+        ▼
+Create Hibernate / EntityManagerFactory
+        │
+        ▼
+Validate entity mappings
+        │
+        ▼
+Create repositories and services
+        │
+        ▼
+Create Spring Security components
+        │
+        ├── PasswordEncoder
+        ├── AuthenticationProvider
+        ├── JWT authentication filter
+        └── SecurityFilterChain
+        │
+        ▼
+ApplicationContext ready
+        │
+        ▼
+Run startup initializers
+        │
+        ├── Demo data initialization
+        │
+        └── Administrative bootstrap
+        │
+        ▼
+Application ready to accept requests
+```
+
+The Spring Security `SecurityContext` is populated during request processing after successful authentication and is not part of application startup initialization.
