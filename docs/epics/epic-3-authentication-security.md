@@ -1,4 +1,4 @@
-# EPIC 3: Authentication, RBAC & Advanced Security 
+# EPIC 3: Authentication, RBAC & Advanced Security  — In Progress
 
 **Objective**: Establish a secure and production-ready authentication and authorization foundation for LEMINI. This Epic introduces environment-aware database initialization, persistent security data, JWT-based authentication, session management, Role-Based Access Control (RBAC), account protection, and two-factor authentication.
 
