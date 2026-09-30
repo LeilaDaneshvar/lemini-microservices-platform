@@ -134,10 +134,10 @@ class UserServiceImplTest {
         when(userMapper.userDtoToUserEntity(userDto)).thenReturn(userEntity);
 
         // Generated Values
-        when(idGenerator.generateUserId(UserServiceImpl.USER_ID_LENGTH)).thenReturn(GENERATED_USER_ID);
+        when(idGenerator.generateUserId()).thenReturn(GENERATED_USER_ID);
         when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
         when(verificationTokenGenerator.generateEmailVerificationToken(GENERATED_USER_ID)).thenReturn("genToken");
-        when(idGenerator.generateAddressId(UserServiceImpl.ADDRESS_ID_LENGTH)).thenReturn("addrId123");
+        when(idGenerator.generateAddressId()).thenReturn("addrId123");
 
         // Mock persistence
         when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -174,10 +174,10 @@ class UserServiceImplTest {
         assertSame(savedUser, savedAddress.getUserProfile());
 
         // Verify Method Invocations
-        verify(idGenerator).generateUserId(UserServiceImpl.USER_ID_LENGTH);
+        verify(idGenerator).generateUserId();
         verify(passwordEncoder).encode(RAW_PASSWORD);
         verify(verificationTokenGenerator).generateEmailVerificationToken(GENERATED_USER_ID);
-        verify(idGenerator).generateAddressId(UserServiceImpl.ADDRESS_ID_LENGTH);
+        verify(idGenerator).generateAddressId();
     }
 
     @Test
@@ -195,7 +195,7 @@ class UserServiceImplTest {
         verify(userRepository).findByEmail(userDto.email());
 
         verify(userMapper, never()).userDtoToUserEntity(any());
-        verify(idGenerator, never()).generateUserId(anyInt());
+        verify(idGenerator, never()).generateUserId();
         verify(passwordEncoder, never()).encode(anyString());
         verify(verificationTokenGenerator, never()).generateEmailVerificationToken(anyString());
         verify(userRepository, never()).save(any(UserEntity.class));
@@ -219,7 +219,7 @@ class UserServiceImplTest {
         verify(userRepository).findByEmail(userDto.email());
         verify(userMapper).userDtoToUserEntity(userDto);
 
-        verify(idGenerator, never()).generateUserId(anyInt());
+        verify(idGenerator, never()).generateUserId();
         verify(passwordEncoder, never()).encode(anyString());
         verify(verificationTokenGenerator, never()).generateEmailVerificationToken(anyString());
         verify(userRepository, never()).save(any(UserEntity.class));
@@ -243,7 +243,7 @@ class UserServiceImplTest {
         verify(userRepository).findByEmail(userDto.email());
         verify(userMapper).userDtoToUserEntity(userDto);
 
-        verify(idGenerator, never()).generateUserId(anyInt());
+        verify(idGenerator, never()).generateUserId();
         verify(passwordEncoder, never()).encode(anyString());
         verify(verificationTokenGenerator, never()).generateEmailVerificationToken(anyString());
         verify(userRepository, never()).save(any(UserEntity.class));

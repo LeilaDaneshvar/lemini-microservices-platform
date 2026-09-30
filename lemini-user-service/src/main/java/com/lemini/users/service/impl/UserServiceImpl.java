@@ -26,12 +26,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    public static final int USER_ID_LENGTH = 30;
-    public static final int ADDRESS_ID_LENGTH = 30;
-
     private final UserRepository userRepository;
     private final UserEntityMapper userMapper;
-    private final IdGenerator idGenerator;
     private final VerificationTokenGenerator verificationTokenGenerator;
     private final PasswordEncoder passwordEncoder;
 
@@ -73,7 +69,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // Generate User ID and Encrypted Password
-        String userId = idGenerator.generateUserId(UserServiceImpl.USER_ID_LENGTH);
+        String userId = IdGenerator.generateUserId();
         userEntity.setUserId(userId);
         userEntity.setEncryptedPassword(passwordEncoder.encode(user.password()));
         userEntity.setEmailVerificationToken(verificationTokenGenerator.generateEmailVerificationToken(userId));
@@ -83,7 +79,7 @@ public class UserServiceImpl implements UserService {
         // Set Addresses UserEntity Reference
         userEntity.getAddresses().forEach(address -> {
             address.setUserProfile(userEntity);
-            address.setAddressId(idGenerator.generateAddressId(UserServiceImpl.ADDRESS_ID_LENGTH));
+            address.setAddressId(IdGenerator.generateAddressId());
         });
 
         // Persist

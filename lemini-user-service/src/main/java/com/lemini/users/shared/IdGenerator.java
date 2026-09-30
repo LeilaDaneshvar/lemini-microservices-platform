@@ -1,26 +1,29 @@
 package com.lemini.users.shared;
 
-import org.springframework.stereotype.Component;
-
 import java.security.SecureRandom;
 import java.util.Random;
 
 
-@Component 
-public class IdGenerator {
+public final class IdGenerator {
 
     private static final Random RANDOM = new SecureRandom();
     private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-    public String generateUserId(int length) {
-        return generateRandomString(length);
+    private static final int DEFAULT_USER_ID_LENGTH = 30;
+    private static final int DEFAULT_ADDRESS_ID_LENGTH = 30;
+    
+    private IdGenerator() {
     }
 
-    public String generateAddressId(int length) {
-        return generateRandomString(length);
+    public static String generateUserId() {
+        return generateRandomString(DEFAULT_USER_ID_LENGTH);
     }
 
-    private String generateRandomString(int length) {
+    public static String generateAddressId() {
+        return generateRandomString(DEFAULT_ADDRESS_ID_LENGTH);
+    }
+
+    private static String generateRandomString(int length) {
         StringBuilder returnValue = new StringBuilder(length);
 
         for (int i = 0; i < length; i++) {

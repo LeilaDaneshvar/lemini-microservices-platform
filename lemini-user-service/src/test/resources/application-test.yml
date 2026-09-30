@@ -2,11 +2,10 @@ server:
     port: 0 # Random port assignment for testing
 spring:
     application:
-        name: lemini-user-service
+        name: lemini-user-service_test
     messages:
         basename: messages,ValidationMessages
-    profiles:
-        default: demo
+    
     # H2 Database Configuration
     datasource:
         url: jdbc:h2:mem:testdb
@@ -16,14 +15,14 @@ spring:
     jpa:
         database-platform: org.hibernate.dialect.H2Dialect
         hibernate:
-            ddl-auto: validate #validate database schema matches my entities
+            ddl-auto: update # Create/update tables automatically
         defer-datasource-initialization: true
         show-sql: true
         properties:
             hibernate:
                 '[format_sql]': true
                 '[highlight_sql]': true
-    h2: # http://localhost:63626/h2-console
+    h2:
         console:
             enabled: true
             path: /h2-console
@@ -66,4 +65,4 @@ logging:
 # ===============================
 app:
     security:
-        tokenSecret: ${TOKEN_SECRET}
+        tokenSecret: M30vObsyV/T6el2QQuGQvZS6HfrzhyUfXiyWrun3sXy6uP+TGGvrN15HRJ5z12mBuR197uaXsZuvRpV6vIiZ6w==
