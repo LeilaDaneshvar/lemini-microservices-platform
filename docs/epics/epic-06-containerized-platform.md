@@ -2,6 +2,8 @@
 
 **Objective:** Containerize the LEMINI services and run the complete platform locally through a reproducible Docker Compose environment.
 
+**Target Milestone:** LEMINI Containerized Platform v0.2
+
 ---
 
 ## Scope
