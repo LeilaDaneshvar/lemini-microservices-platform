@@ -2,6 +2,8 @@
 
 **Objective:** Establish automated repository validation so application changes are consistently built and tested before integration into the main branch.
 
+**Target Milestone:** LEMINI CI/CD Baseline v0.3
+
 ---
 
 ## Scope
