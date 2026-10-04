@@ -2,6 +2,8 @@
 
 **Objective:** Establish the "Brain" of the LEMINI platform. This service integrates local Large Language Models (LLMs) with platform data to provide intelligent summarization, semantic search, and contextual Q&A (RAG) without relying on external cloud APIs.
 
+**Target Milestone:** LEMINI GenAI Integration v0.9
+
 ---
 
 ## Scope
