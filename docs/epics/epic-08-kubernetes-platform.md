@@ -2,6 +2,8 @@
 
 **Objective:** Run the containerized LEMINI platform on a local Kubernetes cluster using reproducible manifests and platform configuration.
 
+**Target Milestone:** LEMINI Kubernetes Platform v0.4
+
 ---
 
 ## Scope
