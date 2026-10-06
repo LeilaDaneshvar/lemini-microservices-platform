@@ -2,6 +2,8 @@
 
 **Objective:** Deploy the Kubernetes-based LEMINI platform to AWS using EKS and supporting managed AWS infrastructure.
 
+**Target Milestone:** LEMINI Cloud Platform v0.5
+
 ---
 
 ## Scope
