@@ -2,6 +2,8 @@
 
 **Objective:** Improve visibility and resilience across the distributed LEMINI platform so service health, request behavior, and failures can be detected and diagnosed consistently.
 
+**Target Milestone:** LEMINI Reliability & Observability v0.6
+
 ---
 
 ## Scope
