@@ -2,6 +2,8 @@
 
 **Objective:** Introduce asynchronous messaging for selected workflows that benefit from decoupled event-driven processing while preserving the existing synchronous core business flow.
 
+**Target Milestone:** LEMINI Event-Driven Platform v0.7
+
 ---
 
 ## Scope
