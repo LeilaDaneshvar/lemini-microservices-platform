@@ -2,6 +2,8 @@
 
 **Objective:** Strengthen the LEMINI platform's security, configuration, persistence, deployment, and recovery behavior for production-like operation.
 
+**Target Milestone:** LEMINI Production Hardening v0.8
+
 ---
 
 ## Scope
