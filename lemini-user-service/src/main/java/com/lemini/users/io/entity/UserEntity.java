@@ -24,7 +24,7 @@ public class UserEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "public_id", nullable = false, unique = true)
     private String userId;
 
     @Column(nullable = false)
