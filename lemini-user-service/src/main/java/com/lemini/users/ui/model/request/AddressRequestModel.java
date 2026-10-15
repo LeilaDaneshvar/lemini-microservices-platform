@@ -21,7 +21,7 @@ public record AddressRequestModel(
     String streetName,
     
     @NotBlank(message = "{validation.address.postalCode.notNull}")
-    @Size(min = 3, max = 10, message = "{validation.address.postalCode.size}")
+    @Size(min = 3, max = 20, message = "{validation.address.postalCode.size}")
     String postalCode,
     
     @NotNull(message = "{validation.address.type.notNull}")
