@@ -31,8 +31,6 @@ public class SetupDataLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
 
-    private final AuthorityRepository authorityRepository;
-
     private final RoleRepository roleRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -42,45 +40,11 @@ public class SetupDataLoader implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
 
-        // 1. Create Authorities
-        AuthorityEntity readAuthority = createAuthorityIfNotFound(Authorities.READ_AUTHORITY);
-        AuthorityEntity writeAuthority = createAuthorityIfNotFound(Authorities.WRITE_AUTHORITY);
-        AuthorityEntity deleteAuthority = createAuthorityIfNotFound(Authorities.DELETE_AUTHORITY);
-        AuthorityEntity updateAuthority = createAuthorityIfNotFound(Authorities.UPDATE_AUTHORITY);
-
-        // 2. Create Roles 
-        // use mutable lists: Hibernate's merge clears/replaces the collection in place
-        createRoleIfNotFound(Roles.ADMIN,
-                new ArrayList<>(List.of(readAuthority, writeAuthority, deleteAuthority, updateAuthority)));
-        createRoleIfNotFound(Roles.USER, new ArrayList<>(List.of(readAuthority, updateAuthority)));
-
-        // 3. Add Admin User
+        // Add Admin User
         addAdminUser();
 
     }
 
-    private void createRoleIfNotFound(Roles roleEnum, Collection<AuthorityEntity> authorities) {
-        roleRepository.findByName(roleEnum.name()).ifPresentOrElse(role -> {
-            // Update logic: Ensure existing roles get new authorities if added to the code
-            role.setAuthorities(authorities);
-            roleRepository.save(role);
-        }, () -> {
-            RoleEntity role = new RoleEntity();
-            role.setName(roleEnum.name());
-            role.setAuthorities(authorities);
-            roleRepository.save(role);
-        });
-    }
-
-    private AuthorityEntity createAuthorityIfNotFound(Authorities authorityEnum) {
-        String name = authorityEnum.name();
-        return authorityRepository.findByName(name).orElseGet(() -> {
-            AuthorityEntity authority = new AuthorityEntity();
-            authority.setName(name);
-            authorityRepository.save(authority);
-            return authority;
-        });
-    }
 
     private void addAdminUser() {
         if (userRepository.findByEmail("admin@admin.com").isPresent()) {

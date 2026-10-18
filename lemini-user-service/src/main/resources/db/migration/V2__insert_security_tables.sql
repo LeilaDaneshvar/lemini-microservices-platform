@@ -10,7 +10,7 @@ VALUES
     ('DELETE'),
     ('UPDATE');
 
-INSERT INTO role_authorities (role_id, authority_id)
+INSERT INTO roles_authorities (role_id, authority_id)
 VALUES
     ((SELECT id FROM roles WHERE name = 'ADMIN'), (SELECT id FROM authorities WHERE name = 'READ')),
     ((SELECT id FROM roles WHERE name = 'ADMIN'), (SELECT id FROM authorities WHERE name = 'WRITE')),
