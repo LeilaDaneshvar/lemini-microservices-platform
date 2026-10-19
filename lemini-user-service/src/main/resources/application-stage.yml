@@ -1,0 +1,55 @@
+server:
+    port: 0 # Random port assignment for testing
+spring:
+    
+    # MYSQL Database Configuration
+    datasource:
+        url: jdbc:mysql://localhost:3306/lemini_user
+        driverClassName: com.mysql.cj.jdbc.Driver
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+    jpa:
+        database-platform: org.hibernate.dialect.MySQL8Dialect
+        show-sql: false
+        properties:
+            hibernate:
+                '[format_sql]': true
+                '[highlight_sql]': true
+
+# ===============================
+# eureka configuration
+# ===============================
+eureka:
+    client:
+        service-url:
+            defaultZone: http://localhost:8761/eureka/
+            register-with-eureka: true
+            fetch-registry: true
+    instance:
+        instance_id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+        
+# ===============================
+# management config
+# ===============================
+management:
+    tracing:
+        sampling:
+            probability: 1.0 # Always sample for tracing in development it will be set to 0.1 in production
+    endpoints:
+        web:
+            exposure:
+                include: "*"  # Expose everything
+
+# ===============================
+# logging config
+# ===============================
+logging:
+  level:
+    com.lemini: DEBUG
+
+# ===============================
+# Application Specific Properties
+# ===============================
+app:
+    security:
+        tokenSecret: ${TOKEN_SECRET}
